@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARMORY | HUNTX</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .shop-header h1 { font-family:'Orbitron',sans-serif; font-size:7rem; background:linear-gradient(45deg,#ff6b00,#ffb800); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; text-shadow:0 0 80px rgba(255,107,0,0.8); text-align:center; margin:4rem 0 2rem; }
+    .controls { display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; margin:2rem 0; padding:1.5rem; background:rgba(25,25,35,0.7); border-radius:50px; border:1px solid rgba(255,107,0,0.5); backdrop-filter:blur(20px); }
+    .controls input, .controls select { padding:1rem 1.8rem; border-radius:50px; border:1px solid rgba(255,107,0,0.5); background:rgba(255,255,255,0.1); color:white; font-weight:600; }
+    .controls input::placeholder { color:#ccc; }
+    .products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); gap:2.8rem; margin:3rem 0; }
+    .product-card { background:rgba(30,30,45,0.7); border-radius:32px; overflow:hidden; border:1px solid rgba(255,107,0,0.4); transition:all 0.6s cubic-bezier(0.23,1,0.32,1); box-shadow:0 20px 50px rgba(0,0,0,0.7); }
+    .product-card:hover { transform:translateY(-25px) scale(1.04); box-shadow:0 0 100px rgba(255,107,0,0.7); }
+    .product-card img { width:100%; height:300px; object-fit:cover; transition:transform 0.6s; }
+    .product-card:hover img { transform:scale(1.15); }
+    .product-info { padding:2rem; text-align:center; }
+    .product-info h3 { font-size:1.9rem; margin:1rem 0 0.5rem; font-weight:700; }
+    .product-info .brand { color:#ff8c00; font-weight:600; margin-bottom:1rem; }
+    .price-tag { font-size:2.7rem; font-weight:900; color:#ff6b00; text-shadow:0 0 40px rgba(255,107,0,0.6); margin:1rem 0; }
+    .add-btn { width:100%; padding:1.5rem; background:linear-gradient(45deg,#ff6b00,#ffb800); color:black; border:none; border-radius:50px; font-size:1.4rem; font-weight:900; cursor:pointer; transition:all 0.4s; text-transform:uppercase; letter-spacing:2px; }
+    .add-btn:hover { transform:scale(1.08); box-shadow:0 0 80px rgba(255,107,0,0.9); }
+    .add-btn.added { background:#2d8b3a; animation:pulse 0.6s; }
+    @keyframes pulse { 0%{transform:scale(1)} 50%{transform:scale(1.15)} 100%{transform:scale(1)} }
+    #floating-cart { position:fixed; bottom:30px; right:30px; background:rgba(20,20,30,0.95); border:2px solid rgba(255,107,0,0.6); border-radius:30px; padding:1.8rem; max-width:400px; backdrop-filter:blur(20px); box-shadow:0 20px 60px rgba(0,0,0,0.8); z-index:999; transform:translateY(150%); transition:transform 0.6s cubic-bezier(0.68,-0.55,0.27,1.55); }
+    #floating-cart.show { transform:translateY(0); }
+    .floating-item { display:flex; align-items:center; gap:1.2rem; padding:1rem 0; border-bottom:1px solid rgba(255,107,0,0.3); }
+    .floating-item img { width:70px; height:70px; object-fit:cover; border-radius:14px; }
+    .floating-total { font-size:2.2rem; font-weight:900; color:#ff6b00; text-align:center; margin:1.5rem 0; }
+  </style>
+</head>
+<body>
+
+<video id="bgVideo" autoplay muted loop playsinline>
+  <source src="https://assets.mixkit.co/videos/preview/mixkit-hunter-walking-in-the-forest-with-a-rifle-40689-large.mp4" type="video/mp4">
+</video>
+
+<button id="themeToggle"><i class="fa-solid fa-moon"></i></button>
+
+<header>
+  <h1>HUNTX</h1>
+  <nav>
+    <a href="index.html">HOME</a>
+    <a href="shop.html">ARMORY</a>
+    <a href="cart.html">LOADOUT (<span id="cart-count">0</span>)</a>
+    <a href="checkout.html">CHECKOUT</a>
+  </nav>
+</header>
+
+<div class="container">
+  <div class="shop-header"><h1>ARMORY</h1></div>
+
+  <div class="controls">
+    <input type="text" id="search" placeholder="SEARCH GEAR..." onkeyup="filterProducts()">
+    <select id="sort" onchange="sortProducts()">
+      <option value="name">Name A-Z</option>
+      <option value="price-low">Price: Low to High</option>
+      <option value="price-high">Price: High to Low</option>
+    </select>
+    <select id="brand-filter" onchange="filterProducts()">
+      <option value="">All Brands</option>
+    </select>
+    <button onclick="clearFilters()" style="background:#e74c3c;padding:1rem 2rem;border-radius:50px;border:none;color:white;font-weight:700;cursor:pointer;">CLEAR</button>
+  </div>
+
+  <div class="products-grid" id="products-grid"></div>
+</div>
+
+<div id="floating-cart">
+  <h3 style="text-align:center;margin-bottom:1rem;color:#ff6b00;font-size:2rem;">LOADOUT PREVIEW</h3>
+  <div id="floating-items"></div>
+  <div class="floating-total">$0.00</div>
+  <a href="cart.html" class="btn" style="margin-top:1.5rem;width:100%;text-align:center;display:block;">VIEW FULL LOADOUT</a>
+</div>
+
+<footer>© 2025 HUNTX — BUILT FOR KILLERS</footer>
+
+<script>
+// 24 PREMIUM PRODUCTS
+const products = [
+  {id:1,name:"Mathews V3X 31",brand:"Mathews",price:1299,image:"https://images.unsplash.com/photo-1603217192634-1919e42ed8ed?w=1000"},
+  {id:2,name:"Hoyt Ventum Pro 30",brand:"Hoyt",price:1399,image:"https://images.unsplash.com/photo-1626806646068-51e8d2e8e0b5?w=1000"},
+  {id:3,name:"Prime Nexus 2",brand:"Prime",price:1199,image:"https://images.unsplash.com/photo-1603217192634-1919e42ed8ed?w=1000"},
+  {id:4,name:"Bowtech Carbon One",brand:"Bowtech",price:1699,image:"https://images.unsplash.com/photo-1603217192634-1919e42ed8ed?w=1000"},
+  {id:5,name:"Leupold VX-6HD 3-18x50",brand:"Leupold",price:1899,image:"https://images.unsplash.com/photo-1588166525140-28d9b2c8a049?w=1000"},
+  {id:6,name:"Vortex Razor HD Gen III",brand:"Vortex",price:2499,image:"https://images.unsplash.com/photo-1588166525140-28d9b2c8a049?w=1000"},
+  {id:7,name:"Swarovski Z8i 2.3-18x56",brand:"Swarovski",price:3899,image:"https://images.unsplash.com/photo-1588166525140-28d9b2c8a049?w=1000"},
+  {id:8,name:"Nightforce ATACR 5-25x56",brand:"Nightforce",price:2899,image:"https://images.unsplash.com/photo-1588166525140-28d9b2c8a049?w=1000"},
+  {id:9,name:"Sitka Fanatic System",brand:"Sitka Gear",price:1199,image:"https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?w=1000"},
+  {id:10,name:"KUIU Venture 3600 Pack",brand:"KUIU",price:599,image:"https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=1000"},
+  {id:11,name:"First Lite Sanctuary 2.0",brand:"First Lite",price:649,image:"https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?w=1000"},
+  {id:12,name:"Pnuma Selway Jacket",brand:"Pnuma",price:399,image:"https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?w=1000"},
+  {id:13,name:"Kenetrek Mountain Extreme",brand:"Kenetrek",price:499,image:"https://images.unsplash.com/photo-1549298916-b41d501d9702?w=1000"},
+  {id:14,name:"Crispi Nevada GTX",brand:"Crispi",price:429,image:"https://images.unsplash.com/photo-1549298916-b41d501d9702?w=1000"},
+  {id:15,name:"Stone Glacier Sky 5900",brand:"Stone Glacier",price:679,image:"https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=1000"},
+  {id:16,name:"Mystery Ranch Metcalf",brand:"Mystery Ranch",price:599,image:"https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=1000"},
+  {id:17,name:"Badlands 2200 Pack",brand:"Badlands",price:399,image:"https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=1000"},
+  {id:18,name:"Trijicon Tenmile HX",brand:"Trijicon",price:1399,image:"https://images.unsplash.com/photo-1588166525140-28d9b2c8a049?w=1000"},
+  {id:19,name:"Sig Sauer Tango6",brand:"Sig Sauer",price:2199,image:"https://images.unsplash.com/photo-1588166525140-28d9b2c8a049?w=1000"},
+  {id:20,name:"Garmin inReach Mini 2",brand:"Garmin",price:399,image:"https://images.unsplash.com/photo-1517420704952-d9f39e95b43e?w=1000"},
+  {id:21,name:"Thermarest NeoAir XTherm",brand:"Thermarest",price:249,image:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1000"},
+  {id:22,name:"Jetboil Flash",brand:"Jetboil",price:129,image:"https://images.unsplash.com/photo-1588166525140-28d9b2c8a049?w=1000"},
+  {id:23,name:"Black Diamond Storm 450",brand:"Black Diamond",price:69,image:"https://images.unsplash.com/photo-1588166525140-28d9b2c8a049?w=1000"},
+  {id:24,name:"Yeti Tundra 65",brand:"Yeti",price:399,image:"https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=1000"}
+];
+
+let filtered = [...products];
+
+// Populate brand filter
+const brands = [...new Set(products.map(p=>p.brand))].sort();
+document.getElementById('brand-filter').innerHTML += brands.map(b=>`<option value="${b}">${b}</option>`).join('');
+
+function render() {
+  document.getElementById('products-grid').innerHTML = filtered.map(p=>`
+    <div class="product-card">
+      <img src="${p.image}" alt="${p.name}">
+      <div class="product-info">
+        <h3>${p.name}</h3>
+        <div class="brand">${p.brand}</div>
+        <div class="price-tag">$${p.price.toLocaleString()}</div>
+        <button class="add-btn" onclick="addToCart(${p.id})">ADD TO LOADOUT</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addToCart(id) {
+  const p = products.find(x=>x.id===id);
+  let cart = JSON.parse(localStorage.getItem('cart')||'[]');
+  const existing = cart.find(x=>x.id===id);
+  if(existing) existing.quantity++;
+  else cart.push({...p,quantity:1});
+  localStorage.setItem('cart',JSON.stringify(cart));
+  updateCartCount();
+  updateFloatingCart();
+
+  const btn = event.target;
+  btn.textContent = "ADDED!";
+  btn.classList.add('added');
+  setTimeout(()=>{ btn.textContent="ADD TO LOADOUT"; btn.classList.remove('added'); },1200);
+}
+
+function filterProducts() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const brand = document.getElementById('brand-filter').value;
+  filtered = products.filter(p=>
+    (p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q)) &&
+    (!brand || p.brand===brand)
+  );
+  render();
+}
+
+function sortProducts() {
+  const s = document.getElementById('sort').value;
+  filtered.sort((a,b)=>{
+    if(s==='price-low') return a.price-b.price;
+    if(s==='price-high') return b.price-a.price;
+    return a.name.localeCompare(b.name);
+  });
+  render();
+}
+
+function clearFilters() {
+  document.getElementById('search').value='';
+  document.getElementById('brand-filter').value='';
+  document.getElementById('sort').value='name';
+  filtered=[...products];
+  render();
+}
+
+function updateFloatingCart() {
+  const cart = JSON.parse(localStorage.getItem('cart')||'[]');
+  const itemsEl = document.getElementById('floating-items');
+  const totalEl = document.querySelector('#floating-cart .floating-total');
+  
+  if(cart.length===0) return document.getElementById('floating-cart').classList.remove('show');
+  
+  itemsEl.innerHTML = cart.slice(0,4).map(i=>`
+    <div class="floating-item">
+      <img src="${i.image}" alt="${i.name}">
+      <div>
+        <div style="font-weight:700;">${i.name}</div>
+        <div style="color:#ff6b00;">$${i.price} × ${i.quantity}</div>
+      </div>
+    </div>
+  `).join('');
+  if(cart.length>4) itemsEl.innerHTML += `<div style="text-align:center;padding:1rem;color:#aaa;">+ ${cart.length-4} more</div>`;
+  
+  totalEl.textContent = '$'+cart.reduce((s,i)=>s+i.price*i.quantity,0).toFixed(2);
+  document.getElementById('floating-cart').classList.add('show');
+}
+
+// CORE CART FUNCTIONS
+function getCart() {
+  return JSON.parse(localStorage.getItem("cart") || "[]");
+}
+
+function updateCartCount() {
+  const count = getCart().reduce((s,i)=>s+i.quantity,0);
+  document.querySelectorAll("#cart-count").forEach(el=>el.textContent=count||0);
+}
+
+// Init everything
+render();
+updateCartCount();
+updateFloatingCart();
+</script>
+</body>
+
+</html>
