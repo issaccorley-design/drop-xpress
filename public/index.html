@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- REQUIRED FOR STRIPE -->
+<script src="https://js.stripe.com/v3/"></script>
+
+<!-- YOUR FRONTEND JS -->
+<script defer src="/script.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HUNTX - Elite Tactical Outfitter</title>
@@ -8,7 +13,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <video id="bgVideo" autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1504280390367-361eaa5995c3?w=1920">
+  <video id="bgVideo" autoplay muted loop playsinline poster="https://media1.giphy.com/media/v1.Y2lkPTZjMDliOTUyaGRlajF2ajM2aHFkc3hsMXV4cjA1b2RpbXY5OTEzajIzNmg0eTR3eCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/ardMfW1w53UvC/200w.gif">
     <source src="https://assets.mixkit.co/videos/preview/mixkit-hunter-walking-in-the-forest-with-a-rifle-40689-large.mp4" type="video/mp4">
   </video>
 
@@ -33,7 +38,7 @@
         Elite gear for apex predators. Precision. Power. Dominance.
       </p>
       <div style="margin:3rem 0;">
-        <a href="shop.html" class="btn" style="padding:2.5rem 8rem;font-size:3rem;letter-spacing:4px;">
+        <a href="shop.html" class="btn" style="padding:3rem 8rem;font-size:1.5rem;letter-spacing:4px;">
           ENTER THE ARMORY
         </a>
       </div>
