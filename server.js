@@ -1,12 +1,4 @@
-
-let stripePromise = fetch("/api/config")
-  .then(r => r.json())
-  .then(({ publishableKey }) => {
-    if (!publishableKey) throw new Error("Stripe key missing");
-    return Stripe(publishableKey);
-  })
-  .catch(err => console.error("Stripe init error:", err));
-  require("dotenv").config();
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
@@ -17,7 +9,7 @@ const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+const BASE_URL = process.env.BASE_URL || "https://huntx.co"; // ← Changed default to your custom domain
 const JWT_SECRET = process.env.JWT_SECRET || "huntx-2025-super-12615abc";
 
 // ====== DATA STORAGE ======
@@ -32,24 +24,45 @@ if (fs.existsSync(USERS_FILE)) {
 }
 const saveUsers = () => fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
 
-// ====== CORS ======
+// ====== CORS - FIXED TO ALLOW CUSTOM DOMAIN ======
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
-    const allowed = [
+
+    const allowedOrigins = [
       "https://drop-xpress.onrender.com",
       "https://www.drop-xpress.onrender.com",
+      "https://huntx.co",
+      "https://www.huntx.co",
       "http://localhost:3000",
       "http://127.0.0.1:3000"
+      // Add any future preview domains here if needed
     ];
-    if (allowed.includes(origin)) return callback(null, true);
-    callback(new Error("Not allowed by CORS"));
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, origin); // Reflect the exact origin
+    } else {
+      console.warn(`Blocked origin: ${origin}`);
+      callback(new Error(`Origin ${origin} not allowed by CORS`));
+    }
   },
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
 
+// Handle preflight OPTIONS requests explicitly
+app.options("*", cors());
+
+// ====== MIDDLEWARE ======
 app.use(express.json());
 app.use(express.static("public"));
+
+// Log incoming requests (helpful for debugging on Render)
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url} from origin: ${req.headers.origin || "unknown"}`);
+  next();
+});
 
 // ====== AUTH MIDDLEWARE ======
 const authMiddleware = (req, res, next) => {
@@ -63,7 +76,7 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
-// ====== API ======
+// ====== API ROUTES ======
 app.get("/api/config", (req, res) => {
   res.json({ publishableKey: process.env.STRIPE_PUBLISHABLE_KEY });
 });
@@ -131,5 +144,5 @@ app.get("*", (req, res) => {
 
 // ====== START SERVER ======
 app.listen(PORT, () => {
-  console.log(`\nHUNTX SERVER RUNNING → ${BASE_URL}\n`);
+  console.log(`\nHUNTX SERVER RUNNING → ${BASE_URL} on port ${PORT}\n`);
 });
