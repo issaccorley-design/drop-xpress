@@ -66,9 +66,16 @@ nav a:hover { background: var(--accent); color: #000; transform: translateY(-4px
   margin: 0 auto; max-width: 1400px; padding: 80px 5% 60px;
 }
 
-.hero h2 { font-size: clamp(4rem, 12vw, 8rem); font-family: 'Orbitron', sans-serif; }
+.hero h2 { 
+  font-size: clamp(3.5rem, 11vw, 7.5rem); 
+  font-family: 'Orbitron', sans-serif; 
+}
 
-.price-tag { font-size: clamp(1.8rem, 5vw, 2.5rem); color: var(--accent); font-weight: 900; }
+.price-tag { 
+  font-size: clamp(1.6rem, 4.5vw, 2.2rem); 
+  color: var(--accent); 
+  font-weight: 900; 
+}
 
 .cart-item { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
 
@@ -78,7 +85,12 @@ nav a:hover { background: var(--accent); color: #000; transform: translateY(-4px
 
 .total-section h3 { font-size: clamp(2rem, 6vw, 2.8rem); margin-bottom: 1rem; }
 
-#floating-cart { position: fixed; bottom: 30px; right: 30px; background: rgba(20,20,30,0.95); border: 2px solid rgba(255,107,0,0.6); border-radius: 30px; padding: 1.8rem; max-width: 400px; backdrop-filter: blur(20px); box-shadow: 0 20px 60px rgba(0,0,0,0.8); z-index: 999; transform: translateY(150%); transition: transform 0.6s cubic-bezier(0.68,-0.55,0.27,1.55); }
+#floating-cart { 
+  position: fixed; bottom: 30px; right: 30px; background: rgba(20,20,30,0.95); 
+  border: 2px solid rgba(255,107,0,0.6); border-radius: 30px; padding: 1.8rem; 
+  max-width: 400px; backdrop-filter: blur(20px); box-shadow: 0 20px 60px rgba(0,0,0,0.8); 
+  z-index: 999; transform: translateY(150%); transition: transform 0.6s cubic-bezier(0.68,-0.55,0.27,1.55); 
+}
 
 #floating-cart.show { transform: translateY(0); }
 
@@ -99,13 +111,25 @@ footer {
   color: #888; font-size: clamp(0.8rem, 3vw, 0.9rem); position: relative; z-index: 10;
 }
 
-.thank-you-body { background: #000 url('https://images.unsplash.com/photo-1504280390367-361eaa5995c3?w=2000') center/cover fixed; 
-  display: grid; place-items: center; min-height: 100vh; text-align: center; padding: 2rem; }
+.thank-you-body { 
+  background: #000 url('https://images.unsplash.com/photo-1504280390367-361eaa5995c3?w=2000') center/cover fixed; 
+  display: grid; place-items: center; min-height: 100vh; text-align: center; padding: 2rem; 
+}
 
 .thank-you-body::before { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.7); z-index: -1; }
 
-.input { width: 100%; padding: 1rem; margin: 0.8rem 0; border-radius: 50px; border: 1px solid var(--border); 
-  background: rgba(255,255,255,0.1); color: #fff; font-size: clamp(1rem, 3.5vw, 1.2rem); text-align: center; }
+.input { 
+  width: 100%; 
+  padding: 1.2rem 1.5rem; 
+  margin: 1rem 0; 
+  border-radius: 50px; 
+  border: 1px solid var(--border); 
+  background: rgba(255,255,255,0.1); 
+  color: #fff; 
+  font-size: max(16px, clamp(1rem, 3.5vw, 1.2rem)); 
+  text-align: center; 
+  min-height: 48px; 
+}
 
 .register-btn { background: #2d8b3a; }
 
@@ -121,8 +145,40 @@ footer {
   header { flex-direction: column; padding: 1rem 3%; }
   nav { justify-content: center; gap: 0.6rem; }
   .controls { flex-direction: column; }
-  #themeToggle { width: 36px; height: 36px; font-size: 1rem; top: 10px; right: 10px; } /* Smaller on mobile */
+  #themeToggle { width: 36px; height: 36px; font-size: 1rem; top: 10px; right: 10px; }
   .container { padding: 80px 3% 60px; }
+
+  /* Extra iOS/Safari zoom prevention & polish */
+  html, body {
+    font-size: 100%;
+    -webkit-text-size-adjust: 100%;
+    touch-action: manipulation;
+  }
+
+  .container, main, section {
+    padding-left: 4%;
+    padding-right: 4%;
+  }
+
+  header {
+    padding: 0.8rem 4%;
+  }
+
+  .glass {
+    padding: 1.8rem 1.5rem;
+  }
+
+  /* Prevent any horizontal overflow that could force zoom */
+  * {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}
+
+/* Force minimum touch targets */
+a, button, input, .btn {
+  min-height: 44px;
+  min-width: 44px;
 }
 
 /* Light Mode Overrides */
@@ -152,22 +208,25 @@ body.light-mode footer { background: rgba(255,255,255,0.95); color: #555; }
 
 /* Minimize Floating Cart */
 #floating-cart.minimized {
-  height: 60px; /* Just show header/minimize button */
+  height: 70px;
   overflow: hidden;
   padding: 1rem;
 }
 
 #floating-cart.minimized #floating-items,
 #floating-cart.minimized .floating-total { display: none; }
-/* Floating Cart Minimized */
-#floating-cart.minimized {
-  height: 70px;
-  overflow: hidden;
-}
-#floating-cart.minimized > div:not(:first-child) { display: none; }
 
 /* Light mode fixes */
 body.light-mode { color: #000; }
 body.light-mode .glass { background: rgba(255,255,255,0.8); }
 body.light-mode header { background: rgba(255,255,255,0.95); }
 body.light-mode nav a { color: #000; background: rgba(0,0,0,0.1); }
+
+/* Override huge inline font-sizes on mobile (login, checkout, etc.) */
+@media (max-width: 767px) {
+  h2[style*="font-size:5rem"], 
+  h2[style*="font-size:6rem"],
+  h2[style*="font-size:4rem"] {
+    font-size: clamp(2.8rem, 10vw, 5rem) !important;
+  }
+}
