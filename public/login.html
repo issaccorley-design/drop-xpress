@@ -26,17 +26,23 @@
         OPERATIVE ACCESS
       </h2>
 
-      <input type="email" id="email" placeholder="EMAIL" class="input">
-      <input type="password" id="password" placeholder="PASSWORD" class="input">
+      <!-- Login Form - Now with method="POST" -->
+      <form id="loginForm" method="POST" action="javascript:void(0);">
+        <input type="email" id="email" placeholder="EMAIL" class="input" required autocomplete="email">
+        <input type="password" id="password" placeholder="PASSWORD" class="input" required autocomplete="current-password">
 
-      <button id="login" class="btn" style="width:100%;margin:2rem 0;font-size:2rem;">ACCESS GRANTED</button>
+        <button type="submit" id="login" class="btn" style="width:100%;margin:2rem 0;font-size:2rem;">ACCESS GRANTED</button>
+      </form>
 
       <hr style="border:1px solid var(--border);margin:3rem 0;">
 
-      <input type="email" id="newEmail" placeholder="NEW EMAIL" class="input">
-      <input type="password" id="newPassword" placeholder="CREATE PASSWORD" class="input">
+      <!-- Register Form - Now with method="POST" -->
+      <form id="registerForm" method="POST" action="javascript:void(0);">
+        <input type="email" id="newEmail" placeholder="NEW EMAIL" class="input" required autocomplete="email">
+        <input type="password" id="newPassword" placeholder="CREATE PASSWORD" class="input" required autocomplete="new-password">
 
-      <button id="register" class="btn" style="width:100%;margin:2rem 0;font-size:2rem;background:#2d8b3a;">CREATE OPERATIVE</button>
+        <button type="submit" id="register" class="btn" style="width:100%;margin:2rem 0;font-size:2rem;background:#2d8b3a;">CREATE OPERATIVE</button>
+      </form>
 
       <p id="msg" style="text-align:center;margin-top:2rem;font-size:1.8rem;color:#ff6b00;font-weight:700;"></p>
     </div>
