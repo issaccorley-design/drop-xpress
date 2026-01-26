@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product | HUNTX</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <video id="bgVideo" autoplay muted loop playsinline></video>
+  <button id="themeToggle"><i class="fa-solid fa-moon"></i></button>
+
+  <header>
+    <h1>HUNTX</h1>
+    <nav>
+      <a href="index.html">HOME</a>
+      <a href="shop.html">ARMORY</a>
+      <a href="cart.html">LOADOUT (<span id="cart-count">0</span>)</a>
+      <span id="user-info"><a href="login.html">LOGIN</a></span>
+    </nav>
+  </header>
+
+  <div class="container" style="padding-top:100px; text-align:center;">
+    <div id="product-detail" class="glass" style="max-width:900px; margin:0 auto; padding:3rem; border-radius:24px;">
+      <p>Loading product details...</p>
+    </div>
+    <a href="shop.html" class="btn" style="margin-top:3rem; padding:1.2rem 3rem; font-size:1.6rem;">← BACK TO ARMORY</a>
+  </div>
+
+  <footer>© <span id="copyright-year"></span> HUNTX</footer>
+
+  <script src="script.js"></script>
+  <script>
+    document.getElementById('copyright-year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
