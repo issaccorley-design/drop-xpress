@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | HUNTX</title>
+
+  <link rel="stylesheet" href="frontier.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+  
+</head>
+
+<body class="frontier-page">
+  <div class="bg"></div>
+
+  <header>
+    <h1>HUNTX</h1>
+    <nav>
+      <a class="active">DASHBOARD</a>
+      <a href="community.html">COMMUNITY</a>
+      <a href="#" id="logout">LOGOUT</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="glass">
+      <h2>MISSION FEED</h2>
+      <p class="mission-text">Internal updates and active operations.</p>
+    </section>
+
+    <section class="glass">
+      <h3>Latest Updates</h3>
+      <ul class="mission-feed">
+        <li>🔸 Frontier System v0.9 field test complete</li>
+        <li>🔸 New research partners onboarded</li>
+        <li>🔸 Community access expanded</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>© <span id="year"></span> HUNTX</footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+    document.getElementById("logout").onclick = () => {
+      localStorage.removeItem("huntx-auth");
+      window.location.href = "index.html";
+    };
+  </script>
+</body>
+</html>

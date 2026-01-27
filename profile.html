@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Profile | HUNTX</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1><i class="fa-solid fa-user"></i> Profile</h1>
+  <nav>
+    <a href="index.html">HOME</a>
+    <a href="shop.html">ARMORY</a>
+    <a href="cart.html">LOADOUT</a>
+    <span id="user-info"></span>
+  </nav>
+</header>
+
+<div class="container">
+  <div id="profileData">Loading...</div>
+</div>
+
+<footer>© <span id="copyright-year"></span> HUNTX</footer>
+
+<script src="script.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById('copyright-year').textContent = new Date().getFullYear();
+    showUserStatus();
+  });
+</script>
+</body>
+</html>

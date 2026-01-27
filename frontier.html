@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Frontier | HUNTX</title>
+
+  <!-- Frontier-only styles -->
+  <link rel="stylesheet" href="frontier.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body class="frontier-page">
+
+  <!-- Header -->
+  <header class="frontier-header">
+    <h1>HUNTX</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="shop.html">Systems</a>
+      <a class="active">Frontier</a>
+      <a href="cart.html">Mission Kit</a>
+    </nav>
+  </header>
+
+  <!-- Main -->
+  <main class="frontier-container">
+
+    <!-- Hero -->
+    <section class="frontier-panel frontier-hero">
+      <h2>The Frontier</h2>
+      <p class="hero-text">
+        Building the tools, systems, and community required for
+        extreme environments — on Earth and beyond.
+      </p>
+    </section>
+
+    <!-- Mission -->
+    <section class="frontier-panel">
+      <h3>Mission Focus</h3>
+      <p>
+        HUNTX exists to support exploration where conventional infrastructure
+        fails — autonomous operations, hostile terrain, and future off-world
+        resource missions.
+      </p>
+      <p>
+        Every system is designed with survivability, modularity, and long-term
+        deployment in mind.
+      </p>
+    </section>
+
+    <!-- Systems -->
+    <section class="frontier-panel">
+      <h3>Frontier Systems</h3>
+      <p>
+        Equipment and components engineered for extreme terrain,
+        autonomous deployment, and next-generation extraction missions.
+      </p>
+
+      <a href="shop.html" class="frontier-btn">
+        View Systems
+      </a>
+    </section>
+
+    <!-- Community -->
+    <section class="frontier-panel">
+      <h3>The HUNTX Community</h3>
+      <p>
+        Engineers, explorers, researchers, and builders preparing for
+        humanity’s next operational frontier.
+      </p>
+      <p>
+        Private access, collaboration tools, and mission briefings coming soon.
+      </p>
+
+      <a href="community.html" class="frontier-btn secondary">
+        Request Access
+      </a>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="frontier-footer">
+    © <span id="year"></span> HUNTX
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+
+</body>
+</html>
