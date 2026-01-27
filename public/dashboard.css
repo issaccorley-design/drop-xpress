@@ -1,0 +1,282 @@
+/* =====================================================
+   HUNTX COMMAND DASHBOARD
+   Precision • Authority • Mobile-safe
+   ===================================================== */
+
+.dashboard-container {
+  display: grid;
+  gap: 3.2rem;
+}
+
+/* ================= COMMAND HEADER ================= */
+
+.dashboard-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0.9rem 1.2rem;
+  background: rgba(6, 9, 18, 0.92);
+  backdrop-filter: blur(18px);
+
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Logo */
+.dashboard-header h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+
+  background: linear-gradient(90deg, #e9ecff, #8fb6ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Nav */
+.dashboard-header nav {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.dashboard-header nav a {
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+
+  padding: 0.55rem 0.9rem;
+  border-radius: 10px;
+
+  color: #cfd6ff;
+  text-decoration: none;
+
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.08);
+
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.dashboard-header nav a:hover,
+.dashboard-header nav a.active {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(143,182,255,0.4);
+  color: #ffffff;
+}
+
+/* iPhone safety */
+@media (max-width: 480px) {
+  .dashboard-header {
+    padding: 0.8rem 1rem;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.1rem;
+  }
+
+  .dashboard-header nav a {
+    padding: 0.45rem 0.7rem;
+    font-size: 0.65rem;
+  }
+}
+
+/* ================= TITLES ================= */
+
+.dashboard-panel h2,
+.dashboard-panel h3 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.8rem, 4.5vw, 2.4rem);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+
+  background: linear-gradient(90deg, #3aa6ff, #ff9f1a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ================= OPERATOR STATUS ================= */
+
+.operator-status {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.6rem;
+  align-items: center;
+  margin-bottom: 2.4rem;
+}
+
+.operator-avatar {
+  width: 66px;
+  height: 66px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #3aa6ff, #ff9f1a);
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 1.35rem;
+  color: #000;
+  box-shadow:
+    0 0 30px rgba(58,166,255,0.7),
+    inset 0 0 20px rgba(255,255,255,0.25);
+}
+
+.operator-info h4 {
+  font-size: 1.15rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.operator-info span {
+  font-size: 0.8rem;
+  color: #9aa4d6;
+  letter-spacing: 0.14em;
+}
+
+/* ================= MISSION FEED ================= */
+
+.mission-feed {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.mission-feed li {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.2rem;
+  align-items: center;
+
+  padding: 1.5rem 1.8rem;
+  background: rgba(255,255,255,0.045);
+  border-radius: 18px;
+  border: 1px solid rgba(255,159,26,0.16);
+  font-size: 1.05rem;
+  color: #e8ecff;
+
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.mission-feed li:hover {
+  transform: translateY(-2px);
+  background: rgba(255,255,255,0.075);
+}
+
+/* mission status dot */
+.mission-feed li::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #3aa6ff;
+  box-shadow: 0 0 14px rgba(58,166,255,0.9);
+}
+
+/* ================= ACTION ZONE ================= */
+
+.dashboard-actions {
+  display: grid;
+  gap: 1.4rem;
+}
+
+/* refined command buttons */
+.dashboard-actions .btn {
+  position: relative;
+  padding: 1.25rem 2.4rem;
+  border-radius: 14px;
+
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(58,166,255,0.3);
+  color: #f5f7ff;
+
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+
+  backdrop-filter: blur(10px);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.04),
+    0 14px 40px rgba(0,0,0,0.7);
+
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+/* subtle sweep */
+.dashboard-actions .btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    120deg,
+    transparent 35%,
+    rgba(255,255,255,0.12),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.dashboard-actions .btn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(
+    135deg,
+    rgba(58,166,255,0.25),
+    rgba(255,159,26,0.25)
+  );
+  border-color: rgba(255,159,26,0.6);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.08),
+    0 22px 60px rgba(0,0,0,0.85);
+}
+
+.dashboard-actions .btn:hover::after {
+  opacity: 1;
+}
+
+.dashboard-actions .btn:active {
+  transform: translateY(0);
+}
+
+/* ================= DESKTOP LAYOUT ================= */
+
+@media (min-width: 900px) {
+  .dashboard-container {
+    grid-template-columns: 2.3fr 1fr;
+    align-items: start;
+  }
+}
+
+/* ================= IPHONE REFINEMENT ================= */
+
+@media (max-width: 480px) {
+  .dashboard-panel {
+    padding: 2rem 1.6rem;
+  }
+
+  .dashboard-panel h2,
+  .dashboard-panel h3 {
+    font-size: 1.6rem;
+    letter-spacing: 0.14em;
+  }
+
+  .mission-feed li {
+    font-size: 0.95rem;
+  }
+
+  .dashboard-actions .btn {
+    font-size: 0.9rem;
+    letter-spacing: 0.2em;
+    padding: 1.15rem 1.8rem;
+  }
+}
