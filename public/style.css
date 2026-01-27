@@ -230,3 +230,225 @@ body.light-mode nav a { color: #000; background: rgba(0,0,0,0.1); }
     font-size: clamp(2.8rem, 10vw, 5rem) !important;
   }
 }
+/* ================== MISSION SECTION ================== */
+.mission-section {
+  max-width: 1100px;
+  margin: 8rem auto;
+  padding: 4rem;
+  text-align: center;
+  border-radius: 28px;
+}
+
+.mission-title {
+  font-size: clamp(3rem, 8vw, 5rem);
+  font-weight: 900;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(45deg, #ff6b00, #ffb800);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.mission-subtitle {
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  font-weight: 700;
+  margin-bottom: 3rem;
+  color: #ffffff;
+}
+
+.mission-text {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  line-height: 1.7;
+  margin-bottom: 2rem;
+  color: #e6e6e6;
+}
+
+.mission-divider {
+  width: 120px;
+  height: 4px;
+  background: #ff6b00;
+  margin: 3rem auto;
+  border-radius: 2px;
+}
+
+.mission-highlight {
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+  font-weight: 800;
+  margin: 3rem 0 2rem;
+  color: #ff6b00;
+}
+
+.mission-tags {
+  font-size: 1.3rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #aaaaaa;
+  margin-top: 2rem;
+}
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@800;900&family=Exo+2:wght@300;400;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  font-family: 'Exo 2', sans-serif;
+  color: #f5f7ff;
+  background: #05070d;
+}
+
+/* BACKGROUND */
+.bg {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at top, rgba(58,166,255,0.15), transparent 40%),
+    radial-gradient(circle at bottom, rgba(255,159,26,0.15), transparent 40%),
+    linear-gradient(135deg, #02030a, #05070d);
+  z-index: -1;
+}
+
+/* HEADER */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(5,7,13,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,159,26,0.3);
+  z-index: 100;
+}
+
+header h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.2rem;
+  letter-spacing: 4px;
+  background: linear-gradient(90deg, #ff9f1a, #3aa6ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+nav a {
+  color: #f5f7ff;
+  text-decoration: none;
+  margin-left: 1rem;
+  font-weight: 700;
+  padding: 0.5rem 1.2rem;
+  border-radius: 30px;
+  border: 1px solid rgba(255,159,26,0.3);
+}
+
+nav a.active {
+  background: linear-gradient(90deg, #ff9f1a, #3aa6ff);
+  color: #000;
+}
+
+/* LAYOUT */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 140px 5% 80px;
+  display: grid;
+  gap: 4rem;
+}
+
+/* PANELS */
+.panel {
+  background: rgba(15,20,35,0.65);
+  backdrop-filter: blur(20px);
+  border-radius: 28px;
+  padding: 4rem;
+  border: 1px solid rgba(255,159,26,0.35);
+  box-shadow:
+    0 0 60px rgba(0,0,0,0.7),
+    inset 0 0 60px rgba(255,159,26,0.05);
+  text-align: center;
+}
+
+.hero h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(3.5rem, 10vw, 6rem);
+  margin-bottom: 2rem;
+  background: linear-gradient(90deg, #ff9f1a, #3aa6ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.panel h3 {
+  font-size: 2.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.panel p {
+  font-size: 1.5rem;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+  color: #dfe4ff;
+}
+
+/* CTA BUTTON */
+.cta {
+  display: inline-block;
+  padding: 2.5rem 7.5rem;
+  font-size: 2.2rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #000;
+  text-decoration: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff9f1a, #3aa6ff);
+  box-shadow:
+    0 0 60px rgba(58,166,255,0.5),
+    0 0 100px rgba(255,159,26,0.6);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.cta:hover {
+  transform: scale(1.08);
+  box-shadow:
+    0 0 90px rgba(58,166,255,0.8),
+    0 0 160px rgba(255,159,26,0.9);
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 2rem;
+  color: #8890c9;
+}
+/* =====================================================
+   GLOBAL MISSION CTA (INDEX + FRONTIER)
+   ===================================================== */
+
+.mission-btn {
+  display: inline-block;
+  margin-top: 3rem;
+  padding: 2.2rem 6.5rem;
+
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+
+  color: #000;
+  background: linear-gradient(45deg, #ff6b00, #ffb800);
+  border-radius: 999px;
+
+  box-shadow: 0 0 45px rgba(255,107,0,0.55);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.mission-btn:hover {
+  transform: scale(1.07);
+  box-shadow: 0 0 80px rgba(255,107,0,0.85);
+}
+
