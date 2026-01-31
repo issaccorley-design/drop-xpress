@@ -374,7 +374,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // ======================
 // STRIPE CHECKOUT BUTTON
 // ======================
-const stripe = Stripe("pk_live_51SPrxJI2mlj5dQddlEN4DgAVTXUFf1CEusczSwDCLAW7bMVBTsX3sq9Uj1nhtoyt2oqYOxSMsgZnumk5Mb8XPiCH00UIfZbfAm"); // your publishable key
+const stripe = Stripe("pk_live_51SPrxJI2mlj5dQddlEN4DgAVTXUFf1CEusczSwDCLAW7bMVBTsX3sq9Uj1nhtoyt2oqYOxSMsgZnumk5Mb8XPiCH00UIfZbfAm");
 
 document.getElementById("checkout-btn")?.addEventListener("click", async () => {
   const token = localStorage.getItem("token");
@@ -402,13 +402,13 @@ document.getElementById("checkout-btn")?.addEventListener("click", async () => {
     });
 
     const data = await res.json();
+    console.log("Stripe response:", data);
 
     if (data.url) {
-      window.location.href = data.url; // ✅ Stripe redirect
+      window.location.href = data.url;
     } else {
-      alert("Checkout failed");
+      alert(data.error || "Checkout failed");
     }
-
   } catch (err) {
     console.error(err);
     alert("Stripe error");
