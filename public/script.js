@@ -73,6 +73,14 @@ const products = [
   {id:175,name:"Buffalo Gear Fish Bag",brand:"Buffalo Gear",price:49,image:"https://images.unsplash.com/photo-1504280390367-361eaa5995c3?w=800"},
   // ... (Continuing with 84 more fishing items in similar format, e.g., reels like Lew's KVD Elite, lures like Berkley MaxScent Stank-Bug, bags like Calissa Offshore Backpack, etc. For brevity, the full list is summarized here; in actual code, expand fully to ID 259 with varied prices/images/brands from sources.)
 ];
+
+// ======================================================
+// STRIPE LOADING
+// ======================================================
+let stripePromise = fetch("/api/config")
+  .then(r => r.json())
+  .then(({ publishableKey }) => Stripe(publishableKey));
+
 // ======================================================
 // CART SYSTEM (uses quantity)
 // ======================================================
@@ -288,6 +296,46 @@ function renderShop() {
     </div>
   `).join("");
 }
+
+// ======================================================
+// CHECKOUT BUTTON
+// ======================================================
+document.getElementById("checkout-button")?.addEventListener("click", async () => {
+  const msg = document.getElementById("msg");
+  const token = getToken();
+
+  if (!token) {
+    msg.textContent = "Please login first";
+    setTimeout(() => location.href = "login.html", 1200);
+    return;
+  }
+
+  msg.textContent = "Redirecting to secure payment...";
+
+  try {
+    const stripe = await stripePromise;
+
+    const res = await fetch("/api/create-checkout-session", {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json", 
+        Authorization: `Bearer ${token}` 
+      },
+      body: JSON.stringify({ items: getCart() })
+    });
+
+    const data = await res.json();
+    if (data.sessionId) {
+      stripe.redirectToCheckout({ sessionId: data.sessionId });
+    } else {
+      msg.textContent = data.error || "Checkout failed";
+    }
+  } catch (err) {
+    msg.textContent = "Network error";
+    console.error(err);
+  }
+});
+
 // ======================================================
 // INIT
 // ======================================================
@@ -370,47 +418,4 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("msg").textContent = "Server error";
     }
   });
-});
-// ======================
-// STRIPE CHECKOUT BUTTON
-// ======================
-const stripe = Stripe("pk_live_51SPrxJI2mlj5dQddlEN4DgAVTXUFf1CEusczSwDCLAW7bMVBTsX3sq9Uj1nhtoyt2oqYOxSMsgZnumk5Mb8XPiCH00UIfZbfAm");
-
-document.getElementById("checkout-btn")?.addEventListener("click", async () => {
-  const token = localStorage.getItem("token");
-  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-
-  if (!token) {
-    alert("Please login first");
-    location.href = "login.html";
-    return;
-  }
-
-  if (!cart.length) {
-    alert("Your cart is empty");
-    return;
-  }
-
-  try {
-    const res = await fetch("/api/create-checkout-session", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({ items: cart })
-    });
-
-    const data = await res.json();
-    console.log("Stripe response:", data);
-
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      alert(data.error || "Checkout failed");
-    }
-  } catch (err) {
-    console.error(err);
-    alert("Stripe error");
-  }
 });
