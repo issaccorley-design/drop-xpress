@@ -97,8 +97,10 @@ app.get("/api/profile", authMiddleware, (req, res) => {
 app.post("/api/create-checkout-session", authMiddleware, async (req, res) => {
   try {
     const { items } = req.body;
-    if (!items || !items.length)
+
+    if (!items || !items.length) {
       return res.status(400).json({ error: "Cart empty" });
+    }
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -115,20 +117,13 @@ app.post("/api/create-checkout-session", authMiddleware, async (req, res) => {
         quantity: item.quantity
       })),
       success_url: `${BASE_URL}/thank-you.html`,
-      cancel_url: `${BASE_URL}/cart.html`,
-      metadata: { user: req.user.email }
+      cancel_url: `${BASE_URL}/cart.html`
     });
 
-    // ✅ THIS IS THE FIX
     res.json({ url: session.url });
 
   } catch (err) {
     console.error("Stripe error:", err);
-    res.status(500).json({ error: "Stripe checkout failed" });
+    res.status(500).json({ error: "Checkout failed" });
   }
-});
-
-// =====================
-app.listen(PORT, () => {
-  console.log(`HUNTX running on ${BASE_URL} (port ${PORT})`);
 });
