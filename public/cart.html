@@ -1,36 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Loadout | HUNTX</title>
-
-  <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="favicon.ico" sizes="any" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOADOUT | HUNTX</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
 </head>
-<script src="https://js.stripe.com/v3/"></script>
 <body>
+  <video id="bgVideo" autoplay muted loop playsinline></video>
+  <button id="themeToggle"><i class="fa-solid fa-moon"></i></button>
+
   <header>
     <h1>HUNTX</h1>
     <nav>
       <a href="index.html">HOME</a>
       <a href="shop.html">ARMORY</a>
       <a href="cart.html">LOADOUT (<span id="cart-count">0</span>)</a>
-      <span id="user-info"></span>
+      <span id="user-info"><a href="login.html">LOGIN</a></span>
     </nav>
   </header>
 
-  <main class="container">
-    <h2 style="text-align:center;">YOUR LOADOUT</h2>
+  <div class="container">
+    <h2 style="text-align:center;margin:3rem 0;font-size:clamp(2.5rem, 10vw, 4.5rem);">YOUR LOADOUT</h2>
     <div id="cart-items"></div>
-
     <div style="text-align:center;margin:4rem 0;">
-  <h3 style="font-size:clamp(2rem, 8vw, 3.5rem);color:#ff6b00;">TOTAL: $<span id="cart-total">0.00</span></h3>
-  <button id="checkout-btn" class="btn">
-  PROCEED TO CHECKOUT
-</button>
-</div>
-  </main>
+      <h3 style="font-size:clamp(2rem, 8vw, 3.5rem);color:#ff6b00;">TOTAL: $<span id="cart-total">0.00</span></h3>
+<button onclick="location.href='checkout.html'" class="btn" style="padding:1.8rem 6rem;font-size:2rem;margin-top:2rem;">PROCEED TO CHECKOUT</button>
+  </div>
 
   <script src="script.js"></script>
 </body>
