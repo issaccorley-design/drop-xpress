@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Summit Request</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="frontier-page">
+
+<header>
+  <h1>HUNTX</h1>
+</header>
+
+<main class="container glass">
+  <h2>Summit Request</h2>
+  <p class="mission-text">
+    Summit access is limited. Requests are reviewed.
+  </p>
+
+  <form id="summitForm">
+    <input class="input" type="text" id="name" placeholder="Name" required>
+    <input class="input" type="email" id="email" placeholder="Email" required>
+
+    <select class="input" id="role" required>
+      <option value="">Select your role</option>
+      <option>Explorer</option>
+      <option>Builder</option>
+      <option>Engineer</option>
+      <option>Investor</option>
+    </select>
+
+    <textarea
+      class="input"
+      id="message"
+      placeholder="Why should you be granted Summit access?"
+      rows="4"
+      required
+    ></textarea>
+
+    <button class="btn" type="submit">Submit Request</button>
+  </form>
+
+  <p id="successMsg" style="display:none; margin-top:2rem;">
+    ✅ Request submitted. You’ll be contacted if approved.
+  </p>
+</main>
+
+<footer class="mission-footer">
+  <p>Built for those who push forward.</p>
+</footer>
+
+<script src="summit.js"></script>
+</body>
+</html>
