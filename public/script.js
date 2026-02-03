@@ -332,61 +332,68 @@ document.addEventListener("DOMContentLoaded", () => {
   updateFloatingCart();
   showUserStatus();
 });
-checkoutBtn.addEventListener("click", async () => {
-  try {
-    console.log("CREATE OPERATIVE clicked");
+document.addEventListener("DOMContentLoaded", () => {
+  const checkoutBtn =
+    document.getElementById("checkout-button") ||
+    document.getElementById("checkout-btn");
 
-    const token = getToken();
-    if (!token) {
-      location.href = "login.html";
-      return;
+  if (!checkoutBtn) return;
+
+  checkoutBtn.addEventListener("click", async () => {
+    try {
+      console.log("CREATE OPERATIVE clicked");
+
+      const token = getToken();
+      if (!token) {
+        location.href = "login.html";
+        return;
+      }
+
+      const cart = getCart();
+      if (!cart.length) {
+        alert("Your cart is empty");
+        return;
+      }
+
+      const stripe = await stripePromise;
+      if (!stripe) {
+        alert("Stripe failed to load");
+        return;
+      }
+
+      const res = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          items: cart.map(i => ({
+            name: i.name,
+            brand: i.brand || "",
+            image: i.image,
+            price: Number(calculateItemPrice(i)),
+            quantity: Number(i.quantity)
+          }))
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.sessionId) {
+        console.error("Stripe session error:", data);
+        alert("Stripe checkout failed");
+        return;
+      }
+
+      await stripe.redirectToCheckout({ sessionId: data.sessionId });
+
+    } catch (err) {
+      console.error(err);
+      document.getElementById("msg").textContent = "Server error";
     }
-
-    const cart = getCart();
-    if (!cart.length) {
-      alert("Your cart is empty");
-      return;
-    }
-
-    const stripe = await stripePromise;
-    if (!stripe) {
-      alert("Stripe failed to load");
-      return;
-    }
-
-    const res = await fetch("/api/create-checkout-session", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        items: cart.map(i => ({
-          name: i.name,
-          brand: i.brand || "",
-          image: i.image,
-          price: Number(calculateItemPrice(i)),
-          quantity: Number(i.quantity)
-        }))
-      })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || !data.sessionId) {
-      console.error("Stripe session error:", data);
-      alert("Stripe checkout failed");
-      return;
-    }
-
-    await stripe.redirectToCheckout({ sessionId: data.sessionId });
-
-  } catch (err) {
-    console.error(err);
-    document.getElementById("msg").textContent = "Server error";
-  }
+  });
 });
-
   // Login button
   document.getElementById("login")?.addEventListener("click", async () => {
     const email = document.getElementById("email")?.value.trim();
