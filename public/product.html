@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PRODUCT | HUNTX</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="favicon.ico">
+</head>
+
+<body>
+
+<header>
+  <h1>HUNTX</h1>
+  <nav>
+    <a href="index.html">HOME</a>
+    <a href="shop.html">ARMORY</a>
+    <a href="cart.html">LOADOUT (<span id="cart-count">0</span>)</a>
+  </nav>
+</header>
+
+<div class="container">
+
+  <div class="glass" id="product-container" style="display:grid; gap:3rem;"></div>
+
+</div>
+
+<footer>
+  © 2025 HUNTX
+</footer>
+
+<script src="products.js"></script>
+<script src="script.js"></script>
+
+<script>
+/* ──────────────────────────────────────────────
+   LOAD PRODUCT FROM URL
+   ────────────────────────────────────────────── */
+const params = new URLSearchParams(window.location.search);
+const id = parseInt(params.get("id"));
+const product = products.find(p => p.id === id);
+
+if (!product) {
+  document.getElementById("product-container").innerHTML =
+    "<h2>Product not found</h2>";
+} else {
+  document.getElementById("product-container").innerHTML = `
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:3rem;">
+
+      <!-- IMAGES -->
+      <div>
+        <img src="${product.image}" style="width:100%; border-radius:24px;">
+      </div>
+
+      <!-- INFO -->
+      <div>
+        <h2 style="font-size:3.5rem;">${product.name}</h2>
+        <p class="brand">${product.brand || "HUNTX"}</p>
+        <div class="price-tag">$${product.price.toLocaleString()}</div>
+
+        <p style="font-size:1.6rem; margin:2rem 0;">
+          ${product.description}
+        </p>
+
+        <button class="btn" onclick="addToCart(event, ${product.id})">
+          ADD TO LOADOUT
+        </button>
+      </div>
+
+    </div>
+
+    <!-- REVIEWS -->
+    <div style="margin-top:4rem;">
+      <h3>Customer Reviews</h3>
+
+      <div id="reviews" style="margin:2rem 0;"></div>
+
+      <div class="glass" style="margin-top:2rem;">
+        <select id="rating" class="input">
+          <option value="5">★★★★★</option>
+          <option value="4">★★★★☆</option>
+          <option value="3">★★★☆☆</option>
+          <option value="2">★★☆☆☆</option>
+          <option value="1">★☆☆☆☆</option>
+        </select>
+
+        <textarea id="reviewText" class="input" placeholder="Write your review..."></textarea>
+
+        <button class="btn" onclick="submitReview()">SUBMIT REVIEW</button>
+      </div>
+    </div>
+  `;
+  loadReviews();
+}
+
+/* ──────────────────────────────────────────────
+   REVIEWS (localStorage)
+   ────────────────────────────────────────────── */
+function loadReviews() {
+  const reviews = JSON.parse(localStorage.getItem(`reviews_${id}`) || "[]");
+  const el = document.getElementById("reviews");
+
+  if (reviews.length === 0) {
+    el.innerHTML = "<p>No reviews yet.</p>";
+    return;
+  }
+
+  el.innerHTML = reviews.map(r => `
+    <div class="glass" style="margin-bottom:1rem;">
+      <div style="color:#ff6b00;font-size:1.4rem;">
+        ${"★".repeat(r.rating)}
+      </div>
+      <p>${r.text}</p>
+    </div>
+  `).join("");
+}
+
+function submitReview() {
+  const rating = document.getElementById("rating").value;
+  const text = document.getElementById("reviewText").value.trim();
+  if (!text) return;
+
+  const key = `reviews_${id}`;
+  const reviews = JSON.parse(localStorage.getItem(key) || "[]");
+  reviews.push({ rating, text });
+  localStorage.setItem(key, JSON.stringify(reviews));
+
+  document.getElementById("reviewText").value = "";
+  loadReviews();
+}
+</script>
+
+</body>
+</html>
