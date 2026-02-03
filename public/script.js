@@ -308,35 +308,6 @@ async function showUserStatus() {
 }
 
 // ======================================================
-// CHECKOUT
-// ======================================================
-document.getElementById("checkout-button")?.addEventListener("click", async () => {
-  const token = getToken();
-  if (!token) return location.href = "login.html";
-
-  const stripe = await stripePromise;
-  const res = await fetch("/api/create-checkout-session", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify({
-      items: getCart().map(i => ({
-        name: i.name,
-        brand: i.brand,
-        image: i.image,
-        price: Number(calculateItemPrice(i)),
-        quantity: Number(i.quantity)
-      }))
-    })
-  });
-
-  const data = await res.json();
-  stripe.redirectToCheckout({ sessionId: data.sessionId });
-});
-
-// ======================================================
 // INIT
 // ======================================================
 document.addEventListener("DOMContentLoaded", () => {
@@ -361,3 +332,114 @@ document.addEventListener("DOMContentLoaded", () => {
   updateFloatingCart();
   showUserStatus();
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const checkoutBtn =
+    document.getElementById("checkout-button") ||
+    document.getElementById("checkout-btn");
+
+  if (!checkoutBtn) {
+    console.error("Checkout button not found");
+    return;
+  }
+
+  checkoutBtn.addEventListener("click", async () => {
+    console.log("CREATE OPERATIVE clicked");
+
+    const token = getToken();
+    if (!token) {
+      location.href = "login.html";
+      return;
+    }
+
+    const stripe = await stripePromise;
+    if (!stripe) {
+      alert("Payment system not ready");
+      return;
+    }
+
+    const res = await fetch("/api/create-checkout-session", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        items: getCart().map(i => ({
+          name: i.name,
+          brand: i.brand || "",
+          image: i.image,
+          price: Number(calculateItemPrice(i)),
+          quantity: Number(i.quantity)
+        }))
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.sessionId) {
+      stripe.redirectToCheckout({ sessionId: data.sessionId });
+    } else {
+      console.error("Checkout failed:", data);
+      alert("Checkout failed");
+    }
+  });
+});
+
+  // Login button
+  document.getElementById("login")?.addEventListener("click", async () => {
+    const email = document.getElementById("email")?.value.trim();
+    const pass = document.getElementById("password")?.value;
+
+    if (!email || !pass) {
+      document.getElementById("msg").textContent = "Fill all fields";
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password: pass })
+      });
+
+      const data = await res.json();
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        location.href = "index.html";
+      } else {
+        document.getElementById("msg").textContent = data.message || "Login failed";
+      }
+    } catch {
+      document.getElementById("msg").textContent = "Server error";
+    }
+  });
+
+  // Register button
+  document.getElementById("register")?.addEventListener("click", async () => {
+    const email = document.getElementById("newEmail")?.value.trim();
+    const pass = document.getElementById("newPassword")?.value;
+
+    if (!email || !pass) {
+      document.getElementById("msg").textContent = "Fill all fields";
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password: pass })
+      });
+
+      const data = await res.json();
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        location.href = "index.html";
+      } else {
+        document.getElementById("msg").textContent = data.message || "Register failed";
+      }
+    } catch {
+      document.getElementById("msg").textContent = "Server error";
+    }
+  });
