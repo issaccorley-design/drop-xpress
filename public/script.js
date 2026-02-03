@@ -307,15 +307,37 @@ function updateFloatingCart() {
     </div>
 
     <div id="floating-items" style="${minimized ? 'display:none;' : ''}">
-      ${cart.map(item => `
-        <div style="display:flex; gap:1rem; align-items:center; margin:1rem 0;">
-          <img src="${item.image}" style="width:60px; height:60px; object-fit:cover; border-radius:12px;">
-          <div style="flex:1;">
-            <div style="font-weight:700;">${item.name}</div>
-            <div style="color:#ff8c00;">$${item.price} × ${item.quantity}</div>
-          </div>
-        </div>
-      `).join('')}
+      ${cart.map((item, index) => `
+  <div style="display:flex; gap:0.8rem; align-items:center; margin:1rem 0;">
+    <img src="${item.image}" style="width:56px; height:56px; object-fit:cover; border-radius:12px;">
+    
+    <div style="flex:1;">
+      <div style="font-weight:700; font-size:0.95rem;">${item.name}</div>
+      <div style="color:#ff8c00; font-size:0.85rem;">
+        $${item.price} × ${item.quantity}
+      </div>
+    </div>
+
+    <button 
+      onclick="removeFromCart(${index})"
+      aria-label="Remove item"
+      style="
+        background:#e74c3c;
+        color:white;
+        border:none;
+        width:32px;
+        height:32px;
+        border-radius:50%;
+        font-size:1.1rem;
+        cursor:pointer;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+      ">
+      ×
+    </button>
+  </div>
+`).join('')}
     </div>
 
     <div style="margin-top:1.5rem; padding-top:1rem; border-top:2px solid #ff6b00; text-align:center;">
@@ -381,29 +403,6 @@ function renderCartAndCheckout() {
   if (cartContainer) cartContainer.innerHTML = html;
   if (totalEl) totalEl.textContent = total.toFixed(2);
 }
-
-// ======================================================
-// SHOP GRID RENDER
-// ======================================================
-function renderShop() {
-  const grid = document.getElementById("products-grid");
-  if (!grid) return;
-
-  const list = window.filtered || products;
-
-  grid.innerHTML = list.map(p => `
-    <div class="product-card glass">
-      <img src="${p.image}" loading="lazy" alt="${p.name}">
-      <div class="product-info">
-        <h3>${p.name}</h3>
-        <div class="brand">${p.brand}</div>
-        <div class="price-tag">$${p.price.toLocaleString()}</div>
-        <button class="add-btn" onclick="addToCart(event, ${p.id})">ADD TO LOADOUT</button>
-      </div>
-    </div>
-  `).join("");
-}
-
 // ======================================================
 // CHECKOUT BUTTON
 // ======================================================
