@@ -1,4 +1,16 @@
-
+let stripePromise = fetch("/api/config")
+  .then(r => {
+    if (!r.ok) throw new Error("Config fetch failed");
+    return r.json();
+  })
+  .then(({ publishableKey }) => {
+    if (!publishableKey) throw new Error("Missing Stripe key");
+    return Stripe(publishableKey);
+  })
+  .catch(err => {
+    console.error("Stripe init error:", err);
+    return null;
+  });
 // Updated renderShop function
 function renderShop() {
   const grid = document.getElementById("products-grid");
@@ -181,12 +193,7 @@ function changeQuantity(index, delta) {
   // ...
 });
 
-// ======================================================
-// STRIPE LOADING
-// ======================================================
-let stripePromise = fetch("/api/config")
-  .then(r => r.json())
-  .then(({ publishableKey }) => Stripe(publishableKey));
+
 
 // ======================================================
 // CART SYSTEM (uses quantity)
@@ -427,10 +434,22 @@ document.getElementById("checkout-button")?.addEventListener("click", async () =
         "Content-Type": "application/json", 
         Authorization: `Bearer ${token}` 
       },
-      body: JSON.stringify({ items: getCart() })
+      body: JSON.stringify({
+  items: getCart().map(item => ({
+    name: item.name,
+    brand: item.brand || "",
+    image: item.image,
+    price: Number(item.price),
+    quantity: Number(item.quantity)
+  }))
+})
     });
 
-    const data = await res.json();
+    if (!res.ok) {
+  const text = await res.text();
+  throw new Error(text || "Checkout request failed");
+}
+const data = await res.json();
     if (data.sessionId) {
       stripe.redirectToCheckout({ sessionId: data.sessionId });
     } else {
