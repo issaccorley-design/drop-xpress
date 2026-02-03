@@ -1,78 +1,185 @@
-const products = [
-  // Original 9 Hunting Products
-  {id:1,name:"Mathews V3X 31",brand:"Mathews",price:1299,image:"https://images.unsplash.com/photo-1603217192634-1919e42ed8ed?w=800"},
-  {id:2,name:"Hoyt Ventum Pro",brand:"Hoyt",price:1399,image:"https://images.unsplash.com/photo-1626806646068-51e8d2e8e0b5?w=800"},
-  {id:3,name:"Leupold VX-6HD",brand:"Leupold",price:1899,image:"https://images.unsplash.com/photo-1588166525140-28d9b2c8a049?w=800"},
-  {id:4,name:"Sitka Fanatic Set",brand:"Sitka Gear",price:899,image:"https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?w=800"},
-  {id:5,name:"Vortex Razor HD",brand:"Vortex",price:1699,image:"https://images.unsplash.com/photo-1621905251933-5d0648d3c33d?w=800"},
-  {id:6,name:"KUIU Pro Pack",brand:"KUIU",price:599,image:"https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=800"},
-  {id:7,name:"Sig Sauer Cross",brand:"Sig Sauer",price:2199,image:"https://images.unsplash.com/photo-1588166525140-28d9b2c8a049?w=1000"},
-  {id:8,name:"Garmin inReach Mini 2",brand:"Garmin",price:399,image:"https://images.unsplash.com/photo-1517420704952-d9f39e95b43e?w=1000"},
-  {id:9,name:"Yeti Tundra 65",brand:"Yeti",price:399,image:"https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=1000"},
 
-  // New Hunting Products (IDs 10-159: ~150 items)
-  {id:10,name:"PSE Mach 33 DS",brand:"PSE",price:1199,image:"https://images.unsplash.com/photo-1603217192634-1919e42ed8ed?w=800"}, // Top 2025 bow from Field & Stream
-  {id:11,name:"Elite Artus 30",brand:"Elite",price:1099,image:"https://images.unsplash.com/photo-1626806646068-51e8d2e8e0b5?w=800"},
-  {id:12,name:"Bowtech Proven 34",brand:"Bowtech",price:1299,image:"https://images.unsplash.com/photo-1588166525140-28d9b2c8a049?w=800"},
-  {id:13,name:"Mathews Lift X 29.5",brand:"Mathews",price:1199,image:"https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?w=800"},
-  {id:14,name:"Hoyt Alpha X2",brand:"Hoyt",price:1399,image:"https://images.unsplash.com/photo-1621905251933-5d0648d3c33d?w=800"},
-  {id:15,name:"Darton Sequel ST33",brand:"Darton",price:999,image:"https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=800"},
-  {id:16,name:"Bear Xpedition XLite",brand:"Bear",price:899,image:"https://images.unsplash.com/photo-1588166525140-28d9b2c8a049?w=1000"},
-  {id:17,name:"Prime RVX 35",brand:"Prime",price:1099,image:"https://images.unsplash.com/photo-1517420704952-d9f39e95b43e?w=1000"},
-  {id:18,name:"Obsession Ultramag 360",brand:"Obsession",price:949,image:"https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=1000"},
-  {id:19,name:"Sako S20 Hunter",brand:"Sako",price:1299,image:"https://images.unsplash.com/photo-1603217192634-1919e42ed8ed?w=800"}, // Top rifle from Backfire.tv
-  {id:20,name:"Smith & Wesson 1854",brand:"Smith & Wesson",price:899,image:"https://images.unsplash.com/photo-1626806646068-51e8d2e8e0b5?w=800"},
-  {id:21,name:"Christensen Arms Ridgeline FFT",brand:"Christensen Arms",price:2199,image:"https://images.unsplash.com/photo-1588166525140-28d9b2c8a049?w=800"},
-  {id:22,name:"Ruger American Gen II",brand:"Ruger",price:599,image:"https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?w=800"},
-  {id:23,name:"Wilson Combat NULA Model 20",brand:"Wilson Combat",price:2499,image:"https://images.unsplash.com/photo-1621905251933-5d0648d3c33d?w=800"},
-  {id:24,name:"Savage Axis 2 Pro",brand:"Savage",price:499,image:"https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=800"},
-  {id:25,name:"Tikka T3x Lite",brand:"Tikka",price:799,image:"https://images.unsplash.com/photo-1588166525140-28d9b2c8a049?w=1000"},
-  {id:26,name:"Weatherby Backcountry 2.0 Ti",brand:"Weatherby",price:1899,image:"https://images.unsplash.com/photo-1517420704952-d9f39e95b43e?w=1000"},
-  {id:27,name:"Browning X-Bolt 2",brand:"Browning",price:1099,image:"https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=1000"},
-  {id:28,name:"Bergara B-14 HMR",brand:"Bergara",price:999,image:"https://images.unsplash.com/photo-1603217192634-1919e42ed8ed?w=800"},
-  {id:29,name:"Marlin 1895 SBL",brand:"Marlin",price:1399,image:"https://images.unsplash.com/photo-1626806646068-51e8d2e8e0b5?w=800"},
-  {id:30,name:"Swarovski NL Pure 10x52",brand:"Swarovski",price:3500,image:"https://images.unsplash.com/photo-1588166525140-28d9b2c8a049?w=800"}, // Top optic from Rifle Shooter
-  {id:31,name:"Zeiss SFL 10x50",brand:"Zeiss",price:1799,image:"https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?w=800"},
-  {id:32,name:"Vortex Razor UHD 18x56",brand:"Vortex",price:2999,image:"https://images.unsplash.com/photo-1621905251933-5d0648d3c33d?w=800"},
-  {id:33,name:"Leupold BX-5 Santiam HD",brand:"Leupold",price:1499,image:"https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=800"},
-  {id:34,name:"Maven C.3 10x50",brand:"Maven",price:475,image:"https://images.unsplash.com/photo-1588166525140-28d9b2c8a049?w=1000"},
-  {id:35,name:"SIG Zulu6 HDX 20x42",brand:"SIG Sauer",price:1299,image:"https://images.unsplash.com/photo-1517420704952-d9f39e95b43e?w=1000"},
-  {id:36,name:"Bushnell R5 10x42",brand:"Bushnell",price:299,image:"https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=1000"},
-  {id:37,name:"Sitka Fanatic Jacket",brand:"Sitka",price:499,image:"https://images.unsplash.com/photo-1603217192634-1919e42ed8ed?w=800"}, // Clothing from ArcheryHunting.com
-  {id:38,name:"KUIU Attack Pant",brand:"KUIU",price:149,image:"https://images.unsplash.com/photo-1626806646068-51e8d2e8e0b5?w=800"},
-  {id:39,name:"Pnuma HighPoint Jacket",brand:"Pnuma",price:399,image:"https://images.unsplash.com/photo-1588166525140-28d9b2c8a049?w=800"},
-  {id:40,name:"Stone Glacier Stealth Pant",brand:"Stone Glacier",price:299,image:"https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?w=800"},
-  {id:41,name:"Forloh Merino Base Layer",brand:"Forloh",price:99,image:"https://images.unsplash.com/photo-1621905251933-5d0648d3c33d?w=800"},
-  {id:42,name:"Nomad Solstice Hoodie",brand:"Nomad",price:129,image:"https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=800"},
-  {id:43,name:"Kenetrek Elevated Extreme Boot",brand:"Kenetrek",price:499,image:"https://images.unsplash.com/photo-1588166525140-28d9b2c8a049?w=1000"},
-  {id:44,name:"ASIO Practice Pant",brand:"ASIO",price:199,image:"https://images.unsplash.com/photo-1517420704952-d9f39e95b43e?w=1000"},
-  {id:45,name:"First Lite Specter Jacket",brand:"First Lite",price:599,image:"https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=1000"},
-  {id:46,name:"Benchmade Raghorn Skinner",brand:"Benchmade",price:249,image:"https://images.unsplash.com/photo-1603217192634-1919e42ed8ed?w=800"}, // Accessories from GearJunkie
-  {id:47,name:"Outdoor Edge WildPak Set",brand:"Outdoor Edge",price:54,image:"https://images.unsplash.com/photo-1626806646068-51e8d2e8e0b5?w=800"},
-  {id:48,name:"ESEE CR2.5 Small Game",brand:"ESEE",price:89,image:"https://images.unsplash.com/photo-1588166525140-28d9b2c8a049?w=800"},
-  {id:49,name:"Buck 110 Folding Hunter",brand:"Buck",price:59,image:"https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?w=800"},
-  {id:50,name:"Cold Steel Hunting Kit",brand:"Cold Steel",price:99,image:"https://images.unsplash.com/photo-1621905251933-5d0648d3c33d?w=800"},
-  // ... (Continuing with 109 more hunting items in similar format, e.g., packs like Mystery Ranch Metcalf, knives like White River Hunter, accessories like Garmin GPSMAP 67i, etc. For brevity, the full list is summarized here; in actual code, expand fully to ID 159 with varied prices/images/brands from sources.)
+// Updated renderShop function
+function renderShop() {
+  const grid = document.getElementById("products-grid");
+  if (!grid) return;
 
-  // New Fishing Products (IDs 160-259: ~100 items)
-  {id:160,name:"Ugly Stik Carbon Inshore",brand:"Ugly Stik",price:99,image:"https://images.unsplash.com/photo-1504280390367-361eaa5995c3?w=800"}, // Rod from Wirecutter
-  {id:161,name:"St. Croix GXR Bass",brand:"St. Croix",price:199,image:"https://images.unsplash.com/photo-1504280390367-361eaa5995c3?w=800"},
-  {id:162,name:"Daiwa Ballistic MQ LT",brand:"Daiwa",price:249,image:"https://images.unsplash.com/photo-1504280390367-361eaa5995c3?w=800"},
-  {id:163,name:"Shimano Stradic FL",brand:"Shimano",price:229,image:"https://images.unsplash.com/photo-1504280390367-361eaa5995c3?w=800"},
-  {id:164,name:"Abu Garcia Revo SX",brand:"Abu Garcia",price:179,image:"https://images.unsplash.com/photo-1504280390367-361eaa5995c3?w=800"},
-  {id:165,name:"Penn Spinfisher VI",brand:"Penn",price:149,image:"https://images.unsplash.com/photo-1504280390367-361eaa5995c3?w=800"},
-  {id:166,name:"Shimano Gravitator",brand:"Shimano",price:50,image:"https://images.unsplash.com/photo-1504280390367-361eaa5995c3?w=800"}, // Lure from Field & Stream
-  {id:167,name:"Rapala PXR Deep Mavrik",brand:"Rapala",price:19,image:"https://images.unsplash.com/photo-1504280390367-361eaa5995c3?w=800"},
-  {id:168,name:"Trout Magnet Jig",brand:"Trout Magnet",price:5,image:"https://images.unsplash.com/photo-1504280390367-361eaa5995c3?w=800"},
-  {id:169,name:"Z-Man TRD CrawZ",brand:"Z-Man",price:6,image:"https://images.unsplash.com/photo-1504280390367-361eaa5995c3?w=800"},
-  {id:170,name:"Simms BugStopper Hoodie",brand:"Simms",price:89,image:"https://images.unsplash.com/photo-1504280390367-361eaa5995c3?w=800"}, // Apparel from Wired2Fish
-  {id:171,name:"Huk Performance Short",brand:"Huk",price:59,image:"https://images.unsplash.com/photo-1504280390367-361eaa5995c3?w=800"},
-  {id:172,name:"Forloh Merino Shirt",brand:"Forloh",price:79,image:"https://images.unsplash.com/photo-1504280390367-361eaa5995c3?w=800"},
-  {id:173,name:"Yeti Hopper M30",brand:"Yeti",price:300,image:"https://images.unsplash.com/photo-1504280390367-361eaa5995c3?w=800"}, // Cooler from TackleDirect
-  {id:174,name:"Engel Live Bait Cooler",brand:"Engel",price:199,image:"https://images.unsplash.com/photo-1504280390367-361eaa5995c3?w=800"},
-  {id:175,name:"Buffalo Gear Fish Bag",brand:"Buffalo Gear",price:49,image:"https://images.unsplash.com/photo-1504280390367-361eaa5995c3?w=800"},
-  // ... (Continuing with 84 more fishing items in similar format, e.g., reels like Lew's KVD Elite, lures like Berkley MaxScent Stank-Bug, bags like Calissa Offshore Backpack, etc. For brevity, the full list is summarized here; in actual code, expand fully to ID 259 with varied prices/images/brands from sources.)
-];
+  const list = window.filtered || products;
+
+  grid.innerHTML = list.map(p => `
+  <a href="product.html?id=${p.id}" class="product-card glass" style="text-decoration:none;color:inherit;">
+    <img src="${p.image}" loading="lazy" alt="${p.name}">
+    <div class="product-info">
+      <h3>${p.name}</h3>
+      <div class="price-tag">$${p.price}</div>
+    </div>
+  </a>
+`).join("");
+}
+
+// FILTERS & SORT — call renderShop()
+function applyFilters() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const brand = document.getElementById('brand-filter').value;
+  const sort = document.getElementById('sort').value;
+
+  filtered = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q);
+    const matchesBrand = !brand || p.brand === brand;
+    const matchesCategory = currentCategory === "all" || p.category === currentCategory;
+    return matchesSearch && matchesBrand && matchesCategory;
+  });
+
+  filtered.sort((a, b) => {
+    if (sort === 'price-low') return a.price - b.price;
+    if (sort === 'price-high') return b.price - a.price;
+    return a.name.localeCompare(b.name);
+  });
+
+  renderShop();  // ← Fixed: use renderShop()
+}
+
+function clearFilters() {
+  document.getElementById('search').value = '';
+  document.getElementById('brand-filter').value = '';
+  document.getElementById('sort').value = 'name';
+  currentCategory = "all";
+  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  document.querySelector('.tab-btn[data-category="all"]').classList.add('active');
+  filtered = [...products];
+  renderShop();  // ← Fixed: use renderShop()
+}
+
+// Your other functions (addToCart, updateCartCount, etc.) remain unchanged...
+
+// INIT – call renderShop()
+document.addEventListener("DOMContentLoaded", () => {
+  // Populate brands
+  const brands = [...new Set(products.map(p => p.brand))].sort();
+  const brandSelect = document.getElementById('brand-filter');
+  if (brandSelect) {
+    brandSelect.innerHTML += brands.map(b => `<option value="${b}">${b}</option>`).join('');
+  }
+
+  renderShop();  // ← Fixed: call renderShop()
+  updateCartCount();
+  updateFloatingCart();
+
+  // Tabs
+  document.querySelectorAll('.tab-btn').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentCategory = tab.dataset.category;
+      applyFilters();
+    });
+  });
+
+  // Floating cart toggle
+  document.getElementById('toggle-floating')?.addEventListener('click', () => {
+    const cart = document.getElementById('floating-cart');
+    const icon = document.querySelector('#toggle-floating i');
+    cart.classList.toggle('minimized');
+    icon.classList.toggle('fa-chevron-up');
+    icon.classList.toggle('fa-chevron-down');
+  });
+function calculateItemPrice(item) {
+  // Use salePrice if it exists and is lower
+  return item.salePrice && item.salePrice < item.price ? item.salePrice : item.price;
+}
+
+function renderCartAndCheckout() {
+  const cart = getCart();
+  const cartContainer = document.getElementById("cart-items");
+  const totalEl = document.getElementById("cart-total");
+
+  if (!cartContainer || !totalEl) return;
+
+  let html = '';
+  let total = 0;
+
+  if (cart.length === 0) {
+    html = `
+      <p style="text-align:center; font-size:3rem; opacity:0.7; margin:6rem 0;">
+        Your loadout is empty.<br>
+        <a href="shop.html" style="color:#ff6b00; text-decoration:none; font-size:1.8rem;">
+          ← Continue Shopping in Armory
+        </a>
+      </p>`;
+  } else {
+    cart.forEach((item, index) => {
+      const price = calculateItemPrice(item);
+      const lineTotal = price * item.quantity;
+      total += lineTotal;
+
+      const saleHtml = item.salePrice && item.salePrice < item.price 
+        ? `<span style="color:#ff6b00; font-size:1.6rem;">Sale!</span> 
+           <span style="text-decoration:line-through; color:#888; margin-left:0.8rem;">
+             $${item.price.toLocaleString()}
+           </span>`
+        : '';
+
+      html += `
+        <div class="cart-item glass" style="display:flex; gap:2rem; align-items:center; padding:2rem; border-radius:24px; margin-bottom:2rem; position:relative;">
+          <img src="${item.image}" style="width:180px; height:180px; object-fit:cover; border-radius:16px;" alt="${item.name}">
+          
+          <div style="flex:1;">
+            <h3 style="font-size:2.5rem; margin:0 0 0.5rem;">${item.name}</h3>
+            <div style="font-size:1.6rem; color:#aaa; margin-bottom:1rem;">${item.category?.toUpperCase() || ''}</div>
+            
+            <div style="display:flex; align-items:center; gap:1.5rem; margin:1rem 0;">
+              <div style="font-size:2rem; font-weight:900; color:#ff6b00;">
+                $${price.toLocaleString()} × ${item.quantity}
+              </div>
+              ${saleHtml}
+            </div>
+
+            <div style="display:flex; gap:1rem; margin:1.5rem 0;">
+              <button onclick="changeQuantity(${index}, -1)" class="btn" style="padding:0.8rem 1.5rem; min-width:50px; font-size:1.6rem;">−</button>
+              <span style="font-size:2rem; min-width:40px; text-align:center;">${item.quantity}</span>
+              <button onclick="changeQuantity(${index}, 1)" class="btn" style="padding:0.8rem 1.5rem; min-width:50px; font-size:1.6rem;">+</button>
+            </div>
+
+            <button onclick="removeFromCart(${index})" style="background:#e74c3c; padding:1rem 2rem; border-radius:50px; color:white; font-size:1.4rem; border:none; cursor:pointer;">
+              Remove
+            </button>
+          </div>
+
+          <div style="font-size:3.2rem; font-weight:900; color:#ff6b00; white-space:nowrap;">
+            $${lineTotal.toLocaleString()}
+          </div>
+        </div>`;
+    });
+
+    html += `
+      <div style="text-align:right; margin:4rem 0; font-size:4.5rem; color:#ff6b00; font-weight:900;">
+        TOTAL: $${total.toFixed(2)}
+      </div>
+      <div style="text-align:center;">
+        <a href="shop.html" class="btn secondary" style="margin-right:2rem; padding:1.2rem 3rem; font-size:1.8rem;">
+          ← Continue Shopping
+        </a>
+      </div>`;
+  }
+
+  cartContainer.innerHTML = html;
+  totalEl.textContent = total.toFixed(2);
+}
+
+// New helper for quantity change
+function changeQuantity(index, delta) {
+  let cart = getCart();
+  if (!cart[index]) return;
+
+  cart[index].quantity = Math.max(1, cart[index].quantity + delta);
+  saveCart(cart);
+  updateCartCount();
+  renderCartAndCheckout();
+  updateFloatingCart();
+}
+  // Theme, login, register (unchanged)
+  // ...
+});
 
 // ======================================================
 // STRIPE LOADING
@@ -345,6 +452,12 @@ document.addEventListener("DOMContentLoaded", () => {
   renderShop();
   renderCartAndCheckout();
   updateFloatingCart();
+  renderCartAndCheckout();   // ← ADD THIS
+  updateCartCount();
+  updateFloatingCart();
+  showUserStatus();
+  // etc.
+});
 
   // Theme toggle
   const toggle = document.getElementById("themeToggle");
@@ -418,4 +531,3 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("msg").textContent = "Server error";
     }
   });
-});
