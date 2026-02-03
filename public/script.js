@@ -332,18 +332,8 @@ document.addEventListener("DOMContentLoaded", () => {
   updateFloatingCart();
   showUserStatus();
 });
-
-document.addEventListener("DOMContentLoaded", () => {
-  const checkoutBtn =
-    document.getElementById("checkout-button") ||
-    document.getElementById("checkout-btn");
-
-  if (!checkoutBtn) {
-    console.error("Checkout button not found");
-    return;
-  }
-
-  checkoutBtn.addEventListener("click", async () => {
+checkoutBtn.addEventListener("click", async () => {
+  try {
     console.log("CREATE OPERATIVE clicked");
 
     const token = getToken();
@@ -352,9 +342,15 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    const cart = getCart();
+    if (!cart.length) {
+      alert("Your cart is empty");
+      return;
+    }
+
     const stripe = await stripePromise;
     if (!stripe) {
-      alert("Payment system not ready");
+      alert("Stripe failed to load");
       return;
     }
 
@@ -365,7 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
         Authorization: `Bearer ${token}`
       },
       body: JSON.stringify({
-        items: getCart().map(i => ({
+        items: cart.map(i => ({
           name: i.name,
           brand: i.brand || "",
           image: i.image,
@@ -377,13 +373,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const data = await res.json();
 
-    if (data.sessionId) {
-      stripe.redirectToCheckout({ sessionId: data.sessionId });
-    } else {
-      console.error("Checkout failed:", data);
-      alert("Checkout failed");
+    if (!res.ok || !data.sessionId) {
+      console.error("Stripe session error:", data);
+      alert("Stripe checkout failed");
+      return;
     }
-  });
+
+    await stripe.redirectToCheckout({ sessionId: data.sessionId });
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("msg").textContent = "Server error";
+  }
 });
 
   // Login button
