@@ -336,7 +336,68 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
+document.getElementById("login")?.addEventListener("click", async () => {
+  const email = document.getElementById("email")?.value.trim();
+  const password = document.getElementById("password")?.value;
+  const msg = document.getElementById("msg");
 
+  if (!email || !password) {
+    msg.textContent = "Fill all fields";
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      msg.textContent = data.message || "Login failed";
+      return;
+    }
+
+    localStorage.setItem("token", data.token);
+    location.href = "index.html";
+  } catch (err) {
+    console.error(err);
+    msg.textContent = "Server error";
+  }
+});
+document.getElementById("register")?.addEventListener("click", async () => {
+  const email = document.getElementById("newEmail")?.value.trim();
+  const password = document.getElementById("newPassword")?.value;
+  const msg = document.getElementById("msg");
+
+  if (!email || !password) {
+    msg.textContent = "Fill all fields";
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      msg.textContent = data.message || "Register failed";
+      return;
+    }
+
+    localStorage.setItem("token", data.token);
+    location.href = "index.html";
+  } catch (err) {
+    console.error(err);
+    msg.textContent = "Server error";
+  }
+});
   updateCartCount();
   renderShop();
   renderCartAndCheckout();
