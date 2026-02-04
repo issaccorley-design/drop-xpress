@@ -8,23 +8,35 @@ const fs = require("fs");
 const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-const BASE_URL = process.env.BASE_URL || "https://huntx.co"; // ← Changed default to your custom domain
+const PORT = process.env.PORT || 10000;
+
+const BASE_URL = process.env.BASE_URL || "https://huntx.co";
 const JWT_SECRET = process.env.JWT_SECRET || "huntx-2025-super-12615abc";
+
+// ====== BASIC HEALTH CHECK ======
+app.get("/", (req, res) => {
+  res.status(200).send("OK");
+});
 
 // ====== DATA STORAGE ======
 const DATA_DIR = path.join(__dirname, "data");
 const USERS_FILE = path.join(DATA_DIR, "users.json");
+
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 let users = [];
 if (fs.existsSync(USERS_FILE)) {
-  try { users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8")); }
-  catch (e) { console.log("users.json corrupted → starting fresh"); }
+  try {
+    users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+  } catch {
+    console.log("users.json corrupted → starting fresh");
+  }
 }
-const saveUsers = () => fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
 
-// ====== CORS - FIXED TO ALLOW CUSTOM DOMAIN ======
+const saveUsers = () =>
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+
+// ====== CORS ======
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
@@ -36,11 +48,10 @@ app.use(cors({
       "https://www.huntx.co",
       "http://localhost:3000",
       "http://127.0.0.1:3000"
-      // Add any future preview domains here if needed
     ];
 
     if (allowedOrigins.includes(origin)) {
-      callback(null, origin); // Reflect the exact origin
+      callback(null, origin);
     } else {
       console.warn(`Blocked origin: ${origin}`);
       callback(new Error(`Origin ${origin} not allowed by CORS`));
@@ -51,14 +62,13 @@ app.use(cors({
   credentials: true
 }));
 
-// Handle preflight OPTIONS requests explicitly
 app.options("*", cors());
 
 // ====== MIDDLEWARE ======
 app.use(express.json());
 app.use(express.static("public"));
 
-// Log incoming requests (helpful for debugging on Render)
+// Request logger (Render-friendly)
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url} from origin: ${req.headers.origin || "unknown"}`);
   next();
@@ -68,6 +78,7 @@ app.use((req, res, next) => {
 const authMiddleware = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")?.[1];
   if (!token) return res.status(401).json({ message: "No token" });
+
   try {
     req.user = jwt.verify(token, JWT_SECRET);
     next();
@@ -83,8 +94,11 @@ app.get("/api/config", (req, res) => {
 
 app.post("/api/register", async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ message: "Missing fields" });
-  if (users.find(u => u.email === email)) return res.status(400).json({ message: "User exists" });
+  if (!email || !password)
+    return res.status(400).json({ message: "Missing fields" });
+
+  if (users.find(u => u.email === email))
+    return res.status(400).json({ message: "User exists" });
 
   const hashed = await bcrypt.hash(password, 12);
   users.push({ email, password: hashed, createdAt: new Date().toISOString() });
@@ -97,6 +111,7 @@ app.post("/api/register", async (req, res) => {
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
   const user = users.find(u => u.email === email);
+
   if (!user || !(await bcrypt.compare(password, user.password)))
     return res.status(401).json({ message: "Wrong credentials" });
 
@@ -112,24 +127,29 @@ app.get("/api/profile", authMiddleware, (req, res) => {
 
 app.post("/api/create-checkout-session", authMiddleware, async (req, res) => {
   const { items } = req.body;
-  if (!Array.isArray(items) || items.length === 0) return res.status(400).json({ error: "Cart empty" });
+  if (!Array.isArray(items) || items.length === 0)
+    return res.status(400).json({ error: "Cart empty" });
 
   try {
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
       mode: "payment",
+      payment_method_types: ["card"],
       line_items: items.map(i => ({
         price_data: {
           currency: "usd",
-          product_data: { name: `${i.name} - ${i.brand || ""}`.trim(), images: i.image ? [i.image] : [] },
-          unit_amount: Math.round(i.price * 100),
+          product_data: {
+            name: `${i.name} - ${i.brand || ""}`.trim(),
+            images: i.image ? [i.image] : []
+          },
+          unit_amount: Math.round(i.price * 100)
         },
-        quantity: i.quantity,
+        quantity: i.quantity
       })),
       success_url: `${BASE_URL}/thank-you.html`,
       cancel_url: `${BASE_URL}/checkout.html`,
-      metadata: { user_email: req.user.email },
+      metadata: { user_email: req.user.email }
     });
+
     res.json({ sessionId: session.id });
   } catch (err) {
     console.error("Stripe error:", err.message);
@@ -142,7 +162,7 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// ====== START SERVER ======
+// ====== START SERVER (ONLY ONCE) ======
 app.listen(PORT, () => {
   console.log(`\nHUNTX SERVER RUNNING → ${BASE_URL} on port ${PORT}\n`);
 });
