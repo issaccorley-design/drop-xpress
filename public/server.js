@@ -13,11 +13,6 @@ const PORT = process.env.PORT || 10000;
 const BASE_URL = process.env.BASE_URL || "https://huntx.co";
 const JWT_SECRET = process.env.JWT_SECRET || "huntx-2025-super-12615abc";
 
-// ====== BASIC HEALTH CHECK ======
-app.get("/", (req, res) => {
-  res.status(200).send("OK");
-});
-
 // ====== DATA STORAGE ======
 const DATA_DIR = path.join(__dirname, "data");
 const USERS_FILE = path.join(DATA_DIR, "users.json");
@@ -166,3 +161,4 @@ app.get("*", (req, res) => {
 app.listen(PORT, () => {
   console.log(`\nHUNTX SERVER RUNNING → ${BASE_URL} on port ${PORT}\n`);
 });
+
