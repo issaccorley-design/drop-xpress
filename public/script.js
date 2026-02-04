@@ -311,28 +311,34 @@ async function showUserStatus() {
 // INIT
 // ======================================================
 document.addEventListener("DOMContentLoaded", () => {
-  const brands = [...new Set(products.map(p => p.brand))].sort();
-  const brandSelect = document.getElementById("brand-filter");
-  if (brandSelect) {
-    brandSelect.innerHTML += brands.map(b => `<option value="${b}">${b}</option>`).join('');
-  }
+  // ===== Shop init =====
+  if (typeof products !== "undefined") {
+    const brands = [...new Set(products.map(p => p.brand))].sort();
+    const brandSelect = document.getElementById("brand-filter");
+    if (brandSelect) {
+      brandSelect.innerHTML += brands
+        .map(b => `<option value="${b}">${b}</option>`)
+        .join("");
+    }
 
-  document.querySelectorAll('.tab-btn').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      currentCategory = tab.dataset.category;
-      applyFilters();
+    document.querySelectorAll(".tab-btn").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn")
+          .forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        currentCategory = tab.dataset.category;
+        applyFilters();
+      });
     });
-  });
+  }
 
   updateCartCount();
   renderShop();
   renderCartAndCheckout();
   updateFloatingCart();
   showUserStatus();
-});
-document.addEventListener("DOMContentLoaded", () => {
+
+  // ===== Checkout =====
   const checkoutBtn =
     document.getElementById("checkout-button") ||
     document.getElementById("checkout-btn");
@@ -380,32 +386,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const data = await res.json();
 
-if (res.status === 401) {
-  alert("Please log in before checkout");
-  location.href = "login.html";
-  return;
-}
+      if (res.status === 401) {
+        alert("Please log in before checkout");
+        location.href = "login.html";
+        return;
+      }
 
-if (!res.ok) {
-  console.error("Checkout error:", data);
-  alert(data.error || "Checkout failed");
-  return;
-}
+      if (!res.ok) {
+        console.error("Checkout error:", data);
+        document.getElementById("msg").textContent =
+          data.error || "Checkout failed";
+        return;
+      }
 
-if (!data.sessionId) {
-  alert("Stripe session not created");
-  return;
-}
+      if (!data.sessionId) {
+        document.getElementById("msg").textContent =
+          "Stripe session not created";
+        return;
+      }
 
+      const result = await stripe.redirectToCheckout({
+        sessionId: data.sessionId
+      });
 
-      await stripe.redirectToCheckout({ sessionId: data.sessionId });
+      if (result.error) {
+        console.error("Stripe redirect error:", result.error);
+        document.getElementById("msg").textContent =
+          result.error.message;
+      }
 
     } catch (err) {
-      console.error(err);
-      document.getElementById("msg").textContent = "Server error";
+      console.error("Checkout exception:", err);
+      document.getElementById("msg").textContent =
+        err?.message || "Checkout failed. Check console.";
     }
   });
 });
+
   // Login button
   document.getElementById("login")?.addEventListener("click", async () => {
     const email = document.getElementById("email")?.value.trim();
