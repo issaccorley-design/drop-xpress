@@ -1,4 +1,9 @@
-// ======================================================
+
+const API_BASE =
+  location.hostname === "localhost"
+    ? ""
+    : "https://drop-xpress.onrender.com";
+    // ======================================================
 // STRIPE INIT
 // ======================================================
 let stripePromise = fetch("/api/config")
@@ -338,13 +343,12 @@ document.addEventListener("DOMContentLoaded", () => {
   updateFloatingCart();
   showUserStatus();
 
-  // ===== Checkout =====
-  const checkoutBtn =
-    document.getElementById("checkout-button") ||
-    document.getElementById("checkout-btn");
+// ===== Checkout =====
+const checkoutBtn =
+  document.getElementById("checkout-button") ||
+  document.getElementById("checkout-btn");
 
-  if (!checkoutBtn) return;
-
+if (checkoutBtn) {
   checkoutBtn.addEventListener("click", async () => {
     try {
       console.log("CREATE OPERATIVE clicked");
@@ -367,7 +371,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const res = await fetch("/api/create-checkout-session", {
+      const res = await fetch(`${API_BASE}/api/create-checkout-session`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -385,25 +389,23 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       if (res.status === 401) {
-  alert("Please log in before checkout");
-  location.href = "login.html";
-  return;
-}
+        alert("Please log in before checkout");
+        location.href = "login.html";
+        return;
+      }
 
-const contentType = res.headers.get("content-type");
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await res.text();
+        console.error("Expected JSON, got:", text);
+        document.getElementById("msg").textContent =
+          "Server returned HTML instead of JSON";
+        return;
+      }
 
-if (!contentType || !contentType.includes("application/json")) {
-  const text = await res.text();
-  console.error("Expected JSON, got:", text);
-  document.getElementById("msg").textContent =
-    "Server returned HTML instead of JSON";
-  return;
-}
-
-const data = await res.json();
+      const data = await res.json();
 
       if (!res.ok) {
-        console.error("Checkout error:", data);
         document.getElementById("msg").textContent =
           data.error || "Checkout failed";
         return;
@@ -420,7 +422,6 @@ const data = await res.json();
       });
 
       if (result.error) {
-        console.error("Stripe redirect error:", result.error);
         document.getElementById("msg").textContent =
           result.error.message;
       }
@@ -431,62 +432,6 @@ const data = await res.json();
         err?.message || "Checkout failed. Check console.";
     }
   });
-});
+}   // closes: if (checkoutBtn)
 
-  // Login button
-  document.getElementById("login")?.addEventListener("click", async () => {
-    const email = document.getElementById("email")?.value.trim();
-    const pass = document.getElementById("password")?.value;
-
-    if (!email || !pass) {
-      document.getElementById("msg").textContent = "Fill all fields";
-      return;
-    }
-
-    try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password: pass })
-      });
-
-      const data = await res.json();
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-        location.href = "index.html";
-      } else {
-        document.getElementById("msg").textContent = data.message || "Login failed";
-      }
-    } catch {
-      document.getElementById("msg").textContent = "Server error";
-    }
-  });
-
-  // Register button
-  document.getElementById("register")?.addEventListener("click", async () => {
-    const email = document.getElementById("newEmail")?.value.trim();
-    const pass = document.getElementById("newPassword")?.value;
-
-    if (!email || !pass) {
-      document.getElementById("msg").textContent = "Fill all fields";
-      return;
-    }
-
-    try {
-      const res = await fetch("/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password: pass })
-      });
-
-      const data = await res.json();
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-        location.href = "index.html";
-      } else {
-        document.getElementById("msg").textContent = data.message || "Register failed";
-      }
-    } catch {
-      document.getElementById("msg").textContent = "Server error";
-    }
-  });
+});  
