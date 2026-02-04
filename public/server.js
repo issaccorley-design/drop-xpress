@@ -8,7 +8,14 @@ const fs = require("fs");
 const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
+
+app.get("/", (req, res) => {
+  res.status(200).send("OK");
+});
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 const BASE_URL = process.env.BASE_URL || "https://huntx.co"; // ← Changed default to your custom domain
 const JWT_SECRET = process.env.JWT_SECRET || "huntx-2025-super-12615abc";
 
