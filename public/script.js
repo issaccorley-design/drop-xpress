@@ -1,3 +1,4 @@
+
 const API_BASE =
   location.hostname === "localhost"
     ? "http://localhost:10000"
@@ -291,7 +292,7 @@ function showUserStatus() {
 }
 
 // ────────────────────────────────────────────────
-// CHECKOUT
+// CHECKOUT – FIXED: removed image from payload to avoid 413 Payload Too Large
 // ────────────────────────────────────────────────
 async function handleCheckout() {
   try {
@@ -313,7 +314,7 @@ async function handleCheckout() {
       body: JSON.stringify({
         items: cart.map(i => ({
           name: i.name,
-          image: i.image,
+          // image: i.image,    ← REMOVED to prevent large payload / 413 error on Render
           price: Number(calculateItemPrice(i)),
           quantity: Number(i.quantity)
         }))
