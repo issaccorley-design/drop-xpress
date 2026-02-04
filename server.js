@@ -120,7 +120,7 @@ app.get("/api/profile", authMiddleware, (req, res) => {
   res.json({ user: safe });
 });
 
-app.post("/api/create-checkout-session", authMiddleware, async (req, res) => {
+app.post("/api/create-checkout-session", async (req, res) => {
   const { items } = req.body;
   if (!Array.isArray(items) || items.length === 0)
     return res.status(400).json({ error: "Cart empty" });
