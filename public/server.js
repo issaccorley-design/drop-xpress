@@ -13,7 +13,9 @@ const PORT = process.env.PORT || 10000;
 const BASE_URL = process.env.BASE_URL || "https://huntx.co";
 const JWT_SECRET = process.env.JWT_SECRET || "huntx-2025-super-12615abc";
 
-// ====== DATA STORAGE ======
+// ======================================================
+// DATA STORAGE
+// ======================================================
 const DATA_DIR = path.join(__dirname, "data");
 const USERS_FILE = path.join(DATA_DIR, "users.json");
 
@@ -31,7 +33,9 @@ if (fs.existsSync(USERS_FILE)) {
 const saveUsers = () =>
   fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
 
-// ====== CORS ======
+// ======================================================
+// MIDDLEWARE
+// ======================================================
 app.use(cors({
   origin: [
     "https://drop-xpress.onrender.com",
@@ -46,13 +50,21 @@ app.use(cors({
 
 app.use(express.json());
 
-// ====== REQUEST LOGGER ======
+// FORCE JSON FOR ALL API ROUTES (CRITICAL)
+app.use("/api", (req, res, next) => {
+  res.type("json");
+  next();
+});
+
+// REQUEST LOGGER
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   next();
 });
 
-// ====== AUTH MIDDLEWARE ======
+// ======================================================
+// AUTH MIDDLEWARE
+// ======================================================
 const authMiddleware = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.status(401).json({ error: "No token" });
@@ -65,7 +77,9 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
-// ====== API ROUTES ======
+// ======================================================
+// API ROUTES
+// ======================================================
 app.get("/api/config", (req, res) => {
   if (!process.env.STRIPE_PUBLISHABLE_KEY) {
     return res.status(500).json({ error: "Stripe key missing" });
@@ -105,47 +119,53 @@ app.get("/api/profile", authMiddleware, (req, res) => {
   res.json({ user: { email: user.email } });
 });
 
-app.post(
-  "/api/create-checkout-session",
-  authMiddleware,
-  async (req, res) => {
-    try {
-      const { items } = req.body;
-      if (!items?.length)
-        return res.status(400).json({ error: "Cart empty" });
+app.post("/api/create-checkout-session", authMiddleware, async (req, res) => {
+  try {
+    const { items } = req.body;
+    if (!items?.length)
+      return res.status(400).json({ error: "Cart empty" });
 
-      const session = await stripe.checkout.sessions.create({
-        mode: "payment",
-        line_items: items.map(i => ({
-          price_data: {
-            currency: "usd",
-            product_data: { name: i.name },
-            unit_amount: Math.round(i.price * 100)
-          },
-          quantity: i.quantity
-        })),
-        success_url: `${BASE_URL}/thank-you.html`,
-        cancel_url: `${BASE_URL}/checkout.html`,
-        metadata: { email: req.user.email }
-      });
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      line_items: items.map(i => ({
+        price_data: {
+          currency: "usd",
+          product_data: { name: i.name },
+          unit_amount: Math.round(i.price * 100)
+        },
+        quantity: i.quantity
+      })),
+      success_url: `${BASE_URL}/thank-you.html`,
+      cancel_url: `${BASE_URL}/checkout.html`,
+      metadata: { email: req.user.email }
+    });
 
-      res.json({ sessionId: session.id });
-    } catch (err) {
-      console.error("Stripe error:", err);
-      res.status(500).json({ error: "Checkout failed" });
-    }
+    res.json({ sessionId: session.id });
+  } catch (err) {
+    console.error("Stripe error:", err);
+    res.status(500).json({ error: "Checkout failed" });
   }
-);
+});
 
-// ====== API FALLBACK ======
+// ======================================================
+// API FALLBACK
+// ======================================================
 app.use("/api", (_, res) =>
   res.status(404).json({ error: "API route not found" })
 );
 
-// ====== STATIC FILES (AFTER API) ======
+// ======================================================
+// STATIC FILES + SPA FALLBACK (RENDER FIX)
+// ======================================================
 app.use(express.static("public"));
 
-// ====== START SERVER ======
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public/index.html"));
+});
+
+// ======================================================
+// START SERVER
+// ======================================================
 app.listen(PORT, () => {
   console.log(`HUNTX SERVER RUNNING → ${BASE_URL}`);
 });
