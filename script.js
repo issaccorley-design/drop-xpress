@@ -3,7 +3,10 @@ const API_BASE =
     ? "http://localhost:10000"
     : "https://drop-xpress.onrender.com";
 
-    let stripePromise = fetch(`${API_BASE}/api/config`)
+// ────────────────────────────────────────────────
+// Stripe initialization
+// ────────────────────────────────────────────────
+let stripePromise = fetch(`${API_BASE}/api/config`)
   .then(r => {
     if (!r.ok) throw new Error("Config fetch failed");
     return r.json();
@@ -16,10 +19,10 @@ const API_BASE =
     console.error("Stripe init error:", err);
     return null;
   });
-  
-// ======================================================
+
+// ────────────────────────────────────────────────
 // SHOP RENDER
-// ======================================================
+// ────────────────────────────────────────────────
 function renderShop() {
   const grid = document.getElementById("products-grid");
   if (!grid) return;
@@ -37,15 +40,15 @@ function renderShop() {
   `).join("");
 }
 
-// ======================================================
+// ────────────────────────────────────────────────
 // FILTERS & SORT
-// ======================================================
+// ────────────────────────────────────────────────
 function applyFilters() {
   const q = document.getElementById('search')?.value.toLowerCase() || '';
   const brand = document.getElementById('brand-filter')?.value || '';
   const sort = document.getElementById('sort')?.value || 'name';
 
-  filtered = products.filter(p => {
+  window.filtered = products.filter(p => {
     const matchesSearch =
       p.name.toLowerCase().includes(q) ||
       p.brand.toLowerCase().includes(q);
@@ -57,7 +60,7 @@ function applyFilters() {
     return matchesSearch && matchesBrand && matchesCategory;
   });
 
-  filtered.sort((a, b) => {
+  window.filtered.sort((a, b) => {
     if (sort === 'price-low') return a.price - b.price;
     if (sort === 'price-high') return b.price - a.price;
     return a.name.localeCompare(b.name);
@@ -71,8 +74,8 @@ function clearFilters() {
   document.getElementById('brand-filter').value = '';
   document.getElementById('sort').value = 'name';
 
-  currentCategory = "all";
-  filtered = [...products];
+  window.currentCategory = "all";
+  window.filtered = [...products];
 
   document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
   document.querySelector('.tab-btn[data-category="all"]')?.classList.add('active');
@@ -80,9 +83,9 @@ function clearFilters() {
   renderShop();
 }
 
-// ======================================================
+// ────────────────────────────────────────────────
 // CART STORAGE
-// ======================================================
+// ────────────────────────────────────────────────
 function getCart() {
   return JSON.parse(localStorage.getItem("cart") || "[]");
 }
@@ -98,9 +101,9 @@ function updateCartCount() {
   });
 }
 
-// ======================================================
+// ────────────────────────────────────────────────
 // CART HELPERS
-// ======================================================
+// ────────────────────────────────────────────────
 function calculateItemPrice(item) {
   return item.salePrice && item.salePrice < item.price
     ? item.salePrice
@@ -156,9 +159,9 @@ function changeQuantity(index, delta) {
   updateFloatingCart();
 }
 
-// ======================================================
+// ────────────────────────────────────────────────
 // CART PAGE RENDER
-// ======================================================
+// ────────────────────────────────────────────────
 function renderCartAndCheckout() {
   const cart = getCart();
   const cartContainer = document.getElementById("cart-items");
@@ -217,9 +220,9 @@ function renderCartAndCheckout() {
   totalEl.textContent = total.toFixed(2);
 }
 
-// ======================================================
+// ────────────────────────────────────────────────
 // FLOATING CART
-// ======================================================
+// ────────────────────────────────────────────────
 function updateFloatingCart() {
   const container = document.getElementById("floating-cart");
   if (!container) return;
@@ -275,48 +278,74 @@ function updateFloatingCart() {
   });
 }
 
-// ======================================================
-// AUTH
-// ======================================================
+// ────────────────────────────────────────────────
+// AUTH HELPERS
+// ────────────────────────────────────────────────
 function getToken() {
   return localStorage.getItem("token");
 }
 
-async function showUserStatus() {
-  const el = document.getElementById("user-info");
-  if (!el) return;
+function showUserStatus() {
+  // ← Add your logic here if you have a UI element for logged-in status
+  // Example: document.getElementById('user-status').textContent = getToken() ? 'Logged in' : 'Guest';
+}
 
-  const token = getToken();
-  if (!token) {
-    el.innerHTML = `<a href="login.html">LOGIN</a>`;
-    return;
-  }
-
+// ────────────────────────────────────────────────
+// CHECKOUT
+// ────────────────────────────────────────────────
+async function handleCheckout() {
   try {
-  const res = await fetch(`${API_BASE}/api/profile`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+    const stripe = await stripePromise;
+    if (!stripe) {
+      alert("Stripe failed to load");
+      return;
+    }
 
-  if (!res.ok) throw new Error("Profile fetch failed");
+    const cart = getCart();
+    if (!cart.length) {
+      alert("Your cart is empty");
+      return;
+    }
 
-  const { user } = await res.json();
+    const res = await fetch(`${API_BASE}/api/create-checkout-session`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        items: cart.map(i => ({
+          name: i.name,
+          image: i.image,
+          price: Number(calculateItemPrice(i)),
+          quantity: Number(i.quantity)
+        }))
+      })
+    });
 
-    el.innerHTML = `
-      ${user.email}
-      <button onclick="localStorage.removeItem('token');location.reload()">
-        LOGOUT
-      </button>`;
-  } catch {
-    localStorage.removeItem("token");
-    el.innerHTML = `<a href="login.html">LOGIN</a>`;
+    if (!res.headers.get("content-type")?.includes("application/json")) {
+      const text = await res.text();
+      console.error("Server sent non-JSON:", text);
+      alert("Server error — invalid response");
+      return;
+    }
+
+    const data = await res.json();
+
+    if (!res.ok || !data.sessionId) {
+      alert(data.error || "Checkout session creation failed");
+      return;
+    }
+
+    await stripe.redirectToCheckout({ sessionId: data.sessionId });
+  } catch (err) {
+    console.error("Checkout error:", err);
+    alert("Checkout failed — check console for details");
   }
 }
 
-// ======================================================
+// ────────────────────────────────────────────────
 // INIT
-// ======================================================
+// ────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-  // ===== Shop init =====
+  // Shop filters setup
   if (typeof products !== "undefined") {
     const brands = [...new Set(products.map(p => p.brand))].sort();
     const brandSelect = document.getElementById("brand-filter");
@@ -328,171 +357,97 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.querySelectorAll(".tab-btn").forEach(tab => {
       tab.addEventListener("click", () => {
-        document.querySelectorAll(".tab-btn")
-          .forEach(t => t.classList.remove("active"));
+        document.querySelectorAll(".tab-btn").forEach(t => t.classList.remove("active"));
         tab.classList.add("active");
-        currentCategory = tab.dataset.category;
+        window.currentCategory = tab.dataset.category;
         applyFilters();
       });
     });
   }
-document.getElementById("login")?.addEventListener("click", async () => {
-  const email = document.getElementById("email")?.value.trim();
-  const password = document.getElementById("password")?.value;
-  const msg = document.getElementById("msg");
 
-  if (!email || !password) {
-    msg.textContent = "Fill all fields";
-    return;
-  }
+  // Login
+  document.getElementById("login")?.addEventListener("click", async () => {
+    const email = document.getElementById("email")?.value.trim();
+    const password = document.getElementById("password")?.value;
+    const msg = document.getElementById("msg");
 
-  try {
-    const res = await fetch(`${API_BASE}/api/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      msg.textContent = data.message || "Login failed";
+    if (!email || !password) {
+      msg.textContent = "Please fill all fields";
       return;
     }
 
-    localStorage.setItem("token", data.token);
-    location.href = "index.html";
-  } catch (err) {
-    console.error(err);
-    msg.textContent = "Server error";
-  }
-});
-document.getElementById("register")?.addEventListener("click", async () => {
-  const email = document.getElementById("newEmail")?.value.trim();
-  const password = document.getElementById("newPassword")?.value;
-  const msg = document.getElementById("msg");
-
-  if (!email || !password) {
-    msg.textContent = "Fill all fields";
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API_BASE}/api/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      msg.textContent = data.message || "Register failed";
-      return;
-    }
-
-    localStorage.setItem("token", data.token);
-    location.href = "index.html";
-  } catch (err) {
-    console.error(err);
-    msg.textContent = "Server error";
-  }
-});
-  updateCartCount();
-  renderShop();
-  renderCartAndCheckout();
-  updateFloatingCart();
-  showUserStatus();
-
-// ===== Checkout =====
-const checkoutBtn =
-  document.getElementById("checkout-button") ||
-  document.getElementById("checkout-btn");
-
-if (checkoutBtn) {
-  checkoutBtn.addEventListener("click", async () => {
     try {
-      console.log("CREATE OPERATIVE clicked");
-
-      const token = getToken();
-      if (!token) {
-        location.href = "login.html";
-        return;
-      }
-
-      const cart = getCart();
-      if (!cart.length) {
-        alert("Your cart is empty");
-        return;
-      }
-
-      const stripe = await stripePromise;
-      if (!stripe) {
-        alert("Stripe failed to load");
-        return;
-      }
-
-      const res = await fetch(`${API_BASE}/api/create-checkout-session`, {
+      const res = await fetch(`${API_BASE}/api/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          items: cart.map(i => ({
-            name: i.name,
-            brand: i.brand || "",
-            image: i.image,
-            price: Number(calculateItemPrice(i)),
-            quantity: Number(i.quantity)
-          }))
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
       });
 
-      if (res.status === 401) {
-        alert("Please log in before checkout");
-        location.href = "login.html";
-        return;
-      }
-
-      const contentType = res.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        const text = await res.text();
-        console.error("Expected JSON, got:", text);
-        document.getElementById("msg").textContent =
-          "Server returned HTML instead of JSON";
-        return;
+      if (!res.headers.get("content-type")?.includes("application/json")) {
+        throw new Error("Server returned non-JSON response");
       }
 
       const data = await res.json();
 
       if (!res.ok) {
-        document.getElementById("msg").textContent =
-          data.error || "Checkout failed";
+        msg.textContent = data.message || "Login failed";
         return;
       }
 
-      if (!data.sessionId) {
-        document.getElementById("msg").textContent =
-          "Stripe session not created";
-        return;
-      }
-
-      const result = await stripe.redirectToCheckout({
-        sessionId: data.sessionId
-      });
-
-      if (result.error) {
-        document.getElementById("msg").textContent =
-          result.error.message;
-      }
-
+      localStorage.setItem("token", data.token);
+      location.href = "index.html";
     } catch (err) {
-      console.error("Checkout exception:", err);
-      document.getElementById("msg").textContent =
-        err?.message || "Checkout failed. Check console.";
+      console.error(err);
+      msg.textContent = err.message || "Connection error";
     }
   });
-}   // closes: if (checkoutBtn)
 
-});  
+  // Register
+  document.getElementById("register")?.addEventListener("click", async () => {
+    const email = document.getElementById("newEmail")?.value.trim();
+    const password = document.getElementById("newPassword")?.value;
+    const msg = document.getElementById("msg");
+
+    if (!email || !password) {
+      msg.textContent = "Please fill all fields";
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (!res.headers.get("content-type")?.includes("application/json")) {
+        throw new Error("Server returned non-JSON response");
+      }
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        msg.textContent = data.message || "Registration failed";
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+      location.href = "index.html";
+    } catch (err) {
+      console.error(err);
+      msg.textContent = err.message || "Connection error";
+    }
+  });
+
+  // Checkout button(s)
+  const checkoutBtn = document.getElementById("checkout-button") ||
+                      document.getElementById("checkout-btn");
+  checkoutBtn?.addEventListener("click", handleCheckout);
+
+  // Initial renders
+  updateCartCount();
+  renderShop();
+  renderCartAndCheckout();
+  updateFloatingCart();
+  showUserStatus();
+});
