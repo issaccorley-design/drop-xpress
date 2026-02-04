@@ -142,7 +142,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
       })),
       success_url: `${BASE_URL}/thank-you.html`,
       cancel_url: `${BASE_URL}/checkout.html`,
-      metadata: { user_email: req.user.email }
+      metadata: { user_email: req.user?.email || "guest" }
     });
 
     res.json({ sessionId: session.id });
@@ -151,7 +151,9 @@ app.post("/api/create-checkout-session", async (req, res) => {
     res.status(500).json({ error: "Checkout failed" });
   }
 });
-
+app.use("/api", (req, res) => {
+  res.status(404).json({ error: "API route not found" });
+});
 // ====== SPA FALLBACK ======
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
