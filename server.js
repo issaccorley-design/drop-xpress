@@ -155,11 +155,6 @@ app.post("/api/create-checkout-session", async (req, res) => {
 app.use("/api", (req, res) => {
   res.status(404).json({ error: "API route not found" });
 });
-// ====== SPA FALLBACK ======
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
 // ====== START SERVER (ONLY ONCE) ======
 app.listen(PORT, () => {
   console.log(`\nHUNTX SERVER RUNNING → ${BASE_URL} on port ${PORT}\n`);
