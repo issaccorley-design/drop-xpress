@@ -1,12 +1,9 @@
-
 const API_BASE =
   location.hostname === "localhost"
-    ? ""
+    ? "http://localhost:10000"
     : "https://drop-xpress.onrender.com";
-    // ======================================================
-// STRIPE INIT
-// ======================================================
-let stripePromise = fetch("/api/config")
+
+    let stripePromise = fetch(`${API_BASE}/api/config`)
   .then(r => {
     if (!r.ok) throw new Error("Config fetch failed");
     return r.json();
@@ -19,7 +16,7 @@ let stripePromise = fetch("/api/config")
     console.error("Stripe init error:", err);
     return null;
   });
-
+  
 // ======================================================
 // SHOP RENDER
 // ======================================================
@@ -296,10 +293,13 @@ async function showUserStatus() {
   }
 
   try {
-    const res = await fetch("/api/profile", {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    const { user } = await res.json();
+  const res = await fetch(`${API_BASE}/api/profile`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (!res.ok) throw new Error("Profile fetch failed");
+
+  const { user } = await res.json();
 
     el.innerHTML = `
       ${user.email}
