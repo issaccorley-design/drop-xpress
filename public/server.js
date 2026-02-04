@@ -151,6 +151,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
     res.status(500).json({ error: "Checkout failed" });
   }
 });
+// ====== API FALLBACK (JSON ONLY) ======
 app.use("/api", (req, res) => {
   res.status(404).json({ error: "API route not found" });
 });
