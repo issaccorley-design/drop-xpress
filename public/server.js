@@ -10,7 +10,12 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-const BASE_URL = process.env.BASE_URL || "https://huntx.co";
+const BASE_URL =
+  process.env.BASE_URL ||
+  (process.env.NODE_ENV === "production"
+    ? "https://huntx.co"
+    : "http://localhost:3000");
+
 const JWT_SECRET = process.env.JWT_SECRET || "huntx-2025-super-12615abc";
 
 // ======================================================
@@ -48,9 +53,9 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
 
-// FORCE JSON FOR ALL API ROUTES (CRITICAL)
+// FORCE JSON FOR ALL API ROUTES
 app.use("/api", (req, res, next) => {
   res.type("json");
   next();
@@ -155,7 +160,7 @@ app.use("/api", (_, res) =>
 );
 
 // ======================================================
-// STATIC FILES + SPA FALLBACK (RENDER FIX)
+// STATIC FILES + SPA FALLBACK
 // ======================================================
 app.use(express.static("public"));
 
