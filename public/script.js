@@ -380,11 +380,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const data = await res.json();
 
-      if (!res.ok || !data.sessionId) {
-        console.error("Stripe session error:", data);
-        alert("Stripe checkout failed");
-        return;
-      }
+if (res.status === 401) {
+  alert("Please log in before checkout");
+  location.href = "login.html";
+  return;
+}
+
+if (!res.ok) {
+  console.error("Checkout error:", data);
+  alert(data.error || "Checkout failed");
+  return;
+}
+
+if (!data.sessionId) {
+  alert("Stripe session not created");
+  return;
+}
+
 
       await stripe.redirectToCheckout({ sessionId: data.sessionId });
 
@@ -451,3 +463,4 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("msg").textContent = "Server error";
     }
   });
+
