@@ -384,13 +384,23 @@ document.addEventListener("DOMContentLoaded", () => {
         })
       });
 
-      const data = await res.json();
-
       if (res.status === 401) {
-        alert("Please log in before checkout");
-        location.href = "login.html";
-        return;
-      }
+  alert("Please log in before checkout");
+  location.href = "login.html";
+  return;
+}
+
+const contentType = res.headers.get("content-type");
+
+if (!contentType || !contentType.includes("application/json")) {
+  const text = await res.text();
+  console.error("Expected JSON, got:", text);
+  document.getElementById("msg").textContent =
+    "Server returned HTML instead of JSON";
+  return;
+}
+
+const data = await res.json();
 
       if (!res.ok) {
         console.error("Checkout error:", data);
