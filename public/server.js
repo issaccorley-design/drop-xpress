@@ -33,57 +33,43 @@ const saveUsers = () =>
 
 // ====== CORS ======
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-
-    const allowedOrigins = [
-      "https://drop-xpress.onrender.com",
-      "https://www.drop-xpress.onrender.com",
-      "https://huntx.co",
-      "https://www.huntx.co",
-      "http://localhost:3000",
-      "http://127.0.0.1:3000"
-    ];
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, origin);
-    } else {
-      console.warn(`Blocked origin: ${origin}`);
-      callback(new Error(`Origin ${origin} not allowed by CORS`));
-    }
-  },
+  origin: [
+    "https://drop-xpress.onrender.com",
+    "https://www.drop-xpress.onrender.com",
+    "https://huntx.co",
+    "https://www.huntx.co",
+    "http://localhost:3000"
+  ],
   methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-app.options("*", cors());
-
-// ====== MIDDLEWARE ======
 app.use(express.json());
-app.use(express.static("public"));
 
-// Request logger (Render-friendly)
+// ====== REQUEST LOGGER ======
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url} from origin: ${req.headers.origin || "unknown"}`);
+  console.log(`${req.method} ${req.url}`);
   next();
 });
 
 // ====== AUTH MIDDLEWARE ======
 const authMiddleware = (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")?.[1];
-  if (!token) return res.status(401).json({ message: "No token" });
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.status(401).json({ error: "No token" });
 
   try {
     req.user = jwt.verify(token, JWT_SECRET);
     next();
   } catch {
-    return res.status(401).json({ message: "Invalid token" });
+    res.status(401).json({ error: "Invalid token" });
   }
 };
 
 // ====== API ROUTES ======
 app.get("/api/config", (req, res) => {
+  if (!process.env.STRIPE_PUBLISHABLE_KEY) {
+    return res.status(500).json({ error: "Stripe key missing" });
+  }
   res.json({ publishableKey: process.env.STRIPE_PUBLISHABLE_KEY });
 });
 
@@ -96,11 +82,11 @@ app.post("/api/register", async (req, res) => {
     return res.status(400).json({ message: "User exists" });
 
   const hashed = await bcrypt.hash(password, 12);
-  users.push({ email, password: hashed, createdAt: new Date().toISOString() });
+  users.push({ email, password: hashed });
   saveUsers();
 
   const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: "7d" });
-  res.json({ message: "Registered", token });
+  res.json({ token });
 });
 
 app.post("/api/login", async (req, res) => {
@@ -111,51 +97,55 @@ app.post("/api/login", async (req, res) => {
     return res.status(401).json({ message: "Wrong credentials" });
 
   const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: "7d" });
-  res.json({ message: "Logged in", token, email });
+  res.json({ token });
 });
 
 app.get("/api/profile", authMiddleware, (req, res) => {
   const user = users.find(u => u.email === req.user.email);
-  const { password, ...safe } = user || {};
-  res.json({ user: safe });
+  res.json({ user: { email: user.email } });
 });
 
-app.post("/api/create-checkout-session", async (req, res) => {
-  const { items } = req.body;
-  if (!Array.isArray(items) || items.length === 0)
-    return res.status(400).json({ error: "Cart empty" });
+app.post(
+  "/api/create-checkout-session",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const { items } = req.body;
+      if (!items?.length)
+        return res.status(400).json({ error: "Cart empty" });
 
-  try {
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      payment_method_types: ["card"],
-      line_items: items.map(i => ({
-        price_data: {
-          currency: "usd",
-          product_data: {
-            name: `${i.name} - ${i.brand || ""}`.trim(),
-            images: i.image ? [i.image] : []
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        line_items: items.map(i => ({
+          price_data: {
+            currency: "usd",
+            product_data: { name: i.name },
+            unit_amount: Math.round(i.price * 100)
           },
-          unit_amount: Math.round(i.price * 100)
-        },
-        quantity: i.quantity
-      })),
-      success_url: `${BASE_URL}/thank-you.html`,
-      cancel_url: `${BASE_URL}/checkout.html`,
-      metadata: { user_email: req.user?.email || "guest" }
-    });
+          quantity: i.quantity
+        })),
+        success_url: `${BASE_URL}/thank-you.html`,
+        cancel_url: `${BASE_URL}/checkout.html`,
+        metadata: { email: req.user.email }
+      });
 
-    res.json({ sessionId: session.id });
-  } catch (err) {
-    console.error("Stripe error:", err.message);
-    res.status(500).json({ error: "Checkout failed" });
+      res.json({ sessionId: session.id });
+    } catch (err) {
+      console.error("Stripe error:", err);
+      res.status(500).json({ error: "Checkout failed" });
+    }
   }
-});
-// ====== API FALLBACK (JSON ONLY) ======
-app.use("/api", (req, res) => {
-  res.status(404).json({ error: "API route not found" });
-});
-// ====== START SERVER (ONLY ONCE) ======
+);
+
+// ====== API FALLBACK ======
+app.use("/api", (_, res) =>
+  res.status(404).json({ error: "API route not found" })
+);
+
+// ====== STATIC FILES (AFTER API) ======
+app.use(express.static("public"));
+
+// ====== START SERVER ======
 app.listen(PORT, () => {
-  console.log(`\nHUNTX SERVER RUNNING → ${BASE_URL} on port ${PORT}\n`);
+  console.log(`HUNTX SERVER RUNNING → ${BASE_URL}`);
 });
