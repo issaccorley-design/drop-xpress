@@ -308,40 +308,38 @@ async function handleCheckout() {
       return;
     }
 
+    const token = getToken();  // ← from your existing getToken() function
+
+    if (!token) {
+      alert("Please log in to checkout");
+      // Optional: redirect to login page
+      // location.href = "login.html";
+      return;
+    }
+
     const res = await fetch(`${API_BASE}/api/create-checkout-session`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`   // ← this line fixes it
+      },
       body: JSON.stringify({
         items: cart.map(i => ({
           name: i.name,
-          // image: i.image,    ← REMOVED to prevent large payload / 413 error on Render
+          // image: i.image,  // already removed earlier
           price: Number(calculateItemPrice(i)),
           quantity: Number(i.quantity)
         }))
       })
     });
 
-    if (!res.headers.get("content-type")?.includes("application/json")) {
-      const text = await res.text();
-      console.error("Server sent non-JSON:", text);
-      alert("Server error — invalid response");
-      return;
-    }
+    // ... rest of the function unchanged
 
-    const data = await res.json();
-
-    if (!res.ok || !data.sessionId) {
-      alert(data.error || "Checkout session creation failed");
-      return;
-    }
-
-    await stripe.redirectToCheckout({ sessionId: data.sessionId });
   } catch (err) {
     console.error("Checkout error:", err);
     alert("Checkout failed — check console for details");
   }
 }
-
 // ────────────────────────────────────────────────
 // INIT
 // ────────────────────────────────────────────────
