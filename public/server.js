@@ -12,11 +12,9 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-const BASE_URL =
-  process.env.BASE_URL ||
-  (process.env.NODE_ENV === "production"
-    ? "https://huntx.co"
-    : "http://localhost:3000"); // Updated to use huntx.co as base
+const BASE_URL = "https://drop-xpress.onrender.com";  // ← force Render subdomain for now
+// or
+// const BASE_URL = "https://huntx.co";   // only if custom domain is 100% working
 
 console.log("NODE_ENV:", process.env.NODE_ENV); // Debug log
 console.log("BASE_URL set to:", BASE_URL); // Debug log
@@ -184,4 +182,5 @@ app.get("*", (req, res) => {
 // ======================================================
 app.listen(PORT, () => {
   console.log(`HUNTX SERVER RUNNING → ${BASE_URL}`);
+
 });
