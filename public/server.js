@@ -18,6 +18,9 @@ const BASE_URL =
     ? "https://huntx.co"
     : "http://localhost:3000"); // Updated to use huntx.co as base
 
+console.log("NODE_ENV:", process.env.NODE_ENV); // Debug log
+console.log("BASE_URL set to:", BASE_URL); // Debug log
+
 const JWT_SECRET = process.env.JWT_SECRET || "huntx-2025-super-12615abc";
 
 // ======================================================
@@ -131,6 +134,13 @@ app.post("/api/create-checkout-session", authMiddleware, async (req, res) => {
     if (!items?.length)
       return res.status(400).json({ error: "Cart empty" });
 
+    const successUrl = `${BASE_URL}/thank-you.html`;
+    const cancelUrl = `${BASE_URL}/cart.html`;
+
+    console.log("Creating session with:"); // Debug log
+    console.log("  success_url:", successUrl);
+    console.log("  cancel_url:", cancelUrl);
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: items.map(i => ({
@@ -141,8 +151,8 @@ app.post("/api/create-checkout-session", authMiddleware, async (req, res) => {
         },
         quantity: i.quantity
       })),
-      success_url: `${BASE_URL}/thank-you.html`,
-      cancel_url: `${BASE_URL}/cart.html`, // Updated cancel to cart.html for better UX
+      success_url: successUrl,
+      cancel_url: cancelUrl, // Updated cancel to cart.html for better UX
       metadata: { email: req.user.email }
     });
 
