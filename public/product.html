@@ -63,9 +63,7 @@ if (!product) {
           ${product.description}
         </p>
 
-        <button class="btn" onclick="addToCart(event, ${product.id})">
-          ADD TO LOADOUT
-        </button>
+        <button id="add-to-cart-btn" class="btn">ADD TO LOADOUT</button>
       </div>
 
     </div>
@@ -92,6 +90,20 @@ if (!product) {
     </div>
   `;
   loadReviews();
+
+  // Add to cart handler
+  document.getElementById("add-to-cart-btn")?.addEventListener("click", function() {
+    addToCart(id);
+
+    const btn = this;
+    btn.textContent = "ADDED!";
+    btn.disabled = true;
+
+    setTimeout(() => {
+      btn.textContent = "ADD TO LOADOUT";
+      btn.disabled = false;
+    }, 2000);
+  });
 }
 
 /* ──────────────────────────────────────────────
@@ -128,6 +140,23 @@ function submitReview() {
 
   document.getElementById("reviewText").value = "";
   loadReviews();
+}
+
+function getCart() {
+  return JSON.parse(localStorage.getItem("cart") || "[]");
+}
+
+function saveCart(cart) {
+  localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+function updateCartCount() {
+  const count = getCart().reduce((sum, item) => sum + item.quantity, 0);
+  document.querySelectorAll("#cart-count").forEach(el => el.textContent = count);
+}
+
+function calculateItemPrice(item) {
+  return item.salePrice && item.salePrice < item.price ? item.salePrice : item.price;
 }
 </script>
 

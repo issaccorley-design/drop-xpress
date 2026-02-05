@@ -271,7 +271,22 @@ document.querySelectorAll('.tab-btn').forEach(tab => {
     applyFilters();
   });
 });
+function getCart() {
+  return JSON.parse(localStorage.getItem("cart") || "[]");
+}
 
+function saveCart(cart) {
+  localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+function updateCartCount() {
+  const count = getCart().reduce((sum, item) => sum + item.quantity, 0);
+  document.querySelectorAll("#cart-count").forEach(el => el.textContent = count);
+}
+
+function calculateItemPrice(item) {
+  return item.salePrice && item.salePrice < item.price ? item.salePrice : item.price;
+}
 // ──────────────────────────────────────────────
 //   MINIMIZE TOGGLE
 // ──────────────────────────────────────────────
