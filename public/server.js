@@ -184,6 +184,4 @@ app.get("*", (req, res) => {
 // ======================================================
 app.listen(PORT, () => {
   console.log(`HUNTX SERVER RUNNING → ${BASE_URL}`);
-
 });
-
