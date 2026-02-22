@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | HUNTX</title>
+
+  <link rel="stylesheet" href="frontier.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+  <link rel="icon" href="favicon.ico" sizes="any" />
+</head>
+
+<body class="frontier-page">
+  <header>
+    <h1>HUNTX</h1>
+    <nav>
+      <a class="active">DASHBOARD</a>
+      <a href="community.html">COMMUNITY</a>
+      <a href="#" id="logout">LOGOUT</a>
+    </nav>
+  </header>
+
+  <main class="container dashboard-container">
+    <section class="glass dashboard-panel">
+      <h2>MISSION FEED</h2>
+      <p class="mission-text">Internal updates and active operations.</p>
+      <ul class="mission-feed">
+        <li>Frontier System v0.9 field test complete</li>
+        <li>New research partners onboarded</li>
+        <li>Community access expanded</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    © <span id="year"></span> HUNTX
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>

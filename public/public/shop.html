@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARMORY | HUNTX</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://js.stripe.com/v3/"></script>
+  <script defer src="/script.js"></script>
+
+  <style>
+    /* Your shop styles – kept short here; paste your full version if needed */
+    .shop-header h1 { font-family:'Orbitron',sans-serif; font-size:7rem; background:linear-gradient(45deg,#ff6b00,#ffb800); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-shadow:0 0 80px rgba(255,107,0,0.8); text-align:center; margin:4rem 0 2rem; }
+    .category-tabs { display:flex; justify-content:center; gap:2rem; margin:3rem 0; flex-wrap:wrap; }
+    .tab-btn { padding:1.2rem 3rem; font-size:1.6rem; background:rgba(255,255,255,0.1); border:2px solid var(--border); border-radius:50px; cursor:pointer; transition:all 0.4s; }
+    .tab-btn.active, .tab-btn:hover { background:var(--accent); color:#000; transform:scale(1.05); box-shadow:0 0 60px rgba(255,107,0,0.8); }
+    .controls { display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; margin:2rem 0; padding:1.5rem; background:rgba(25,25,35,0.7); border-radius:50px; border:1px solid rgba(255,107,0,0.5); backdrop-filter:blur(20px); }
+    .controls input, .controls select { padding:1rem 1.8rem; border-radius:50px; border:1px solid rgba(255,107,0,0.5); background:rgba(255,255,255,0.1); color:white; font-weight:600; }
+    .controls input::placeholder { color:#ccc; }
+    .products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); gap:2.8rem; margin:3rem 0; }
+    .product-card { background:rgba(30,30,45,0.7); border-radius:32px; overflow:hidden; border:1px solid rgba(255,107,0,0.4); transition:all 0.6s cubic-bezier(0.23,1,0.32,1); box-shadow:0 20px 50px rgba(0,0,0,0.7); }
+    .product-card:hover { transform:translateY(-25px) scale(1.04); box-shadow:0 0 100px rgba(255,107,0,0.7); }
+    .product-card img { width:100%; height:300px; object-fit:cover; transition:transform 0.6s; }
+    .product-card:hover img { transform:scale(1.15); }
+    .product-info { padding:2rem; text-align:center; }
+    .product-info h3 { font-size:1.9rem; margin:1rem 0 0.5rem; font-weight:700; }
+    .product-info .brand { color:#ff8c00; font-weight:600; margin-bottom:1rem; }
+    .price-tag { font-size:2.7rem; font-weight:900; color:#ff6b00; text-shadow:0 0 40px rgba(255,107,0,0.6); margin:1rem 0; }
+    .add-btn { width:100%; padding:1.5rem; background:linear-gradient(45deg,#ff6b00,#ffb800); color:black; border:none; border-radius:50px; font-size:1.4rem; font-weight:900; cursor:pointer; transition:all 0.4s; text-transform:uppercase; letter-spacing:2px; }
+    .add-btn:hover { transform:scale(1.08); box-shadow:0 0 80px rgba(255,107,0,0.9); }
+    .add-btn.added { background:#2d8b3a; animation:pulse 0.6s; }
+    @keyframes pulse { 0%{transform:scale(1)} 50%{transform:scale(1.15)} 100%{transform:scale(1)} }
+
+    /* Floating cart styles */
+    #floating-cart {
+      position: fixed; bottom: 30px; right: 30px;
+      background: rgba(20,20,30,0.95); border: 2px solid rgba(255,107,0,0.6);
+      border-radius: 30px; padding: 1.8rem; max-width: 400px;
+      backdrop-filter: blur(20px); box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+      z-index: 999; transform: translateY(150%); transition: all 0.4s ease; overflow: hidden;
+    }
+    #floating-cart.show { transform: translateY(0); }
+    #floating-cart.minimized { padding: 1rem 1.8rem; height: 70px; border-radius: 50px; overflow: hidden; }
+    .floating-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .toggle-btn { background: none; border: none; color: #ff6b00; font-size: 1.6rem; cursor: pointer; padding: 0.5rem; transition: transform 0.3s; }
+    .toggle-btn:hover { transform: scale(1.2); }
+    #floating-content { transition: opacity 0.3s ease, max-height 0.4s ease; }
+    #floating-cart.minimized #floating-content { opacity: 0; max-height: 0; overflow: hidden; }
+    .floating-item { display: flex; align-items: center; gap: 1.2rem; padding: 1rem 0; border-bottom: 1px solid rgba(255,107,0,0.3); }
+    .floating-item img { width: 70px; height: 70px; object-fit: cover; border-radius: 14px; }
+    .floating-item .info { flex: 1; }
+    .remove-btn {
+      background: #e74c3c; color: white; border: none; border-radius: 50%;
+      width: 28px; height: 28px; font-size: 1.2rem; line-height: 1;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .remove-btn:hover { background: #c0392b; transform: scale(1.15); }
+    .floating-total { font-size: 2.2rem; font-weight: 900; color: #ff6b00; text-align: center; margin: 1.5rem 0; }
+  </style>
+  <link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+</head>
+<body>
+
+<video id="bgVideo" autoplay muted loop playsinline>
+  <source src="data:image/png;base64,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" type="video/mp4">
+</video>
+
+<button id="themeToggle"><i class="fa-solid fa-moon"></i></button>
+
+<header>
+  <h1>HUNTX</h1>
+  <nav>
+    <a href="index.html">HOME</a>
+    <a href="shop.html">ARMORY</a>
+    <a href="cart.html">LOADOUT (<span id="cart-count">0</span>)</a>
+    <a href="checkout.html">CHECKOUT</a>
+    <span id="user-info"><a href="login.html">LOGIN</a></span>
+  </nav>
+</header>
+
+<div class="container">
+  <div class="shop-header"><h1>ARMORY</h1></div>
+
+  <div class="category-tabs">
+    <div class="tab-btn active" data-category="all">ALL GEAR</div>
+    <div class="tab-btn" data-category="hunting">HUNTING</div>
+    <div class="tab-btn" data-category="fishing">FISHING</div>
+  </div>
+
+  <div class="controls">
+    <input type="text" id="search" placeholder="SEARCH GEAR..." onkeyup="applyFilters()">
+    <select id="sort" onchange="applyFilters()">
+      <option value="name">Name A-Z</option>
+      <option value="price-low">Price: Low to High</option>
+      <option value="price-high">Price: High to Low</option>
+    </select>
+    <select id="brand-filter" onchange="applyFilters()">
+      <option value="">All Brands</option>
+    </select>
+    <button onclick="clearFilters()" style="background:#e74c3c; padding:1rem 2rem; border-radius:50px; border:none; color:white; font-weight:700; cursor:pointer;">CLEAR</button>
+  </div>
+
+  <div class="products-grid" id="products-grid"></div>
+</div>
+
+<!-- Floating Loadout Preview -->
+<div id="floating-cart" class="minimized">
+  <div class="floating-header">
+    <h3 style="margin:0; color:#ff6b00; font-size:1.8rem;">LOADOUT PREVIEW</h3>
+    <button id="toggle-floating" class="toggle-btn">
+      <i class="fa-solid fa-chevron-up"></i>
+    </button>
+  </div>
+  <div id="floating-content">
+    <div id="floating-items"></div>
+    <div class="floating-total">$0.00</div>
+    <a href="cart.html" class="btn" style="margin-top:1.5rem; width:100%; text-align:center; display:block;">VIEW FULL LOADOUT</a>
+  </div>
+</div>
+
+<div id="product-grid" class="product-grid"></div>
+<footer>© 2025 HUNTX — BUILT FOR APEX PREDATORS | Sourced from Sportsman's Supply Inc. (ssisports.net) wholesale catalog</footer>
+
+<script>
+// ──────────────────────────────────────────────
+//   PRODUCTS – 50 real-style items from ssisports.net visible brands & categories
+// ──────────────────────────────────────────────
+
+
+// Populate brand filter
+const brands = [...new Set(products.map(p => p.brand))].sort();
+document.getElementById('brand-filter').innerHTML += brands.map(b => `<option value="${b}">${b}</option>`).join('');
+
+// ──────────────────────────────────────────────
+//   RENDER PRODUCTS
+// ──────────────────────────────────────────────
+function render() {
+  const grid = document.getElementById('products-grid');
+  if (filtered.length === 0) {
+    grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;font-size:2rem;color:#ff6b00;">NO GEAR FOUND — ADJUST FILTERS</p>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(p => `
+    <div class="product-card">
+      <img src="${p.image}" loading="lazy" alt="${p.name}">
+      <div class="product-info">
+        <h3>${p.name}</h3>
+        <div class="brand">${p.brand}</div>
+        <div class="price-tag">$${p.price.toLocaleString()}</div>
+        <button class="add-btn" onclick="addToCart(${p.id})">ADD TO LOADOUT</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ──────────────────────────────────────────────
+//   CART FUNCTIONS
+// ──────────────────────────────────────────────
+function addToCart(id) {
+  const p = products.find(x => x.id === id);
+  let cart = getCart();
+  const existing = cart.find(x => x.id === id);
+  if (existing) existing.quantity++;
+  else cart.push({ ...p, quantity: 1 });
+  localStorage.setItem('cart', JSON.stringify(cart));
+  updateCartCount();
+  updateFloatingCart();
+
+  const btn = event.target;
+  btn.textContent = "ADDED!";
+  btn.classList.add('added');
+  setTimeout(() => {
+    btn.textContent = "ADD TO LOADOUT";
+    btn.classList.remove('added');
+  }, 1200);
+}
+
+function removeFromCart(id) {
+  let cart = getCart();
+  cart = cart.filter(item => item.id !== id);
+  localStorage.setItem('cart', JSON.stringify(cart));
+  updateCartCount();
+  updateFloatingCart();
+}
+
+function getCart() {
+  return JSON.parse(localStorage.getItem("cart") || "[]");
+}
+
+function updateCartCount() {
+  const count = getCart().reduce((s,i) => s + i.quantity, 0);
+  document.querySelectorAll("#cart-count").forEach(el => el.textContent = count || 0);
+}
+
+function updateFloatingCart() {
+  const cart = getCart();
+  const itemsEl = document.getElementById('floating-items');
+  const totalEl = document.querySelector('.floating-total');
+  const cartEl = document.getElementById('floating-cart');
+
+  if (cart.length === 0) {
+    cartEl.classList.remove('show');
+    cartEl.classList.add('minimized');
+    return;
+  }
+
+  itemsEl.innerHTML = cart.slice(0,4).map(i => `
+    <div class="floating-item">
+      <img src="${i.image}" alt="${i.name}">
+      <div class="info">
+        <div style="font-weight:700;">${i.name}</div>
+        <div style="color:#ff6b00;">$${i.price} × ${i.quantity}</div>
+      </div>
+      <button class="remove-btn" onclick="removeFromCart(${i.id})" title="Remove item">×</button>
+    </div>
+  `).join('');
+
+  if (cart.length > 4) {
+    itemsEl.innerHTML += `<div style="text-align:center;padding:1rem;color:#aaa;">+ ${cart.length-4} more</div>`;
+  }
+
+  totalEl.textContent = '$' + cart.reduce((s,i) => s + i.price * i.quantity, 0).toFixed(2);
+
+  cartEl.classList.add('show');
+}
+
+// ──────────────────────────────────────────────
+//   FILTERS & TABS
+// ──────────────────────────────────────────────
+function applyFilters() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const brand = document.getElementById('brand-filter').value;
+  const sort = document.getElementById('sort').value;
+
+  filtered = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q);
+    const matchesBrand = !brand || p.brand === brand;
+    const matchesCategory = currentCategory === "all" || p.category === currentCategory;
+    return matchesSearch && matchesBrand && matchesCategory;
+  });
+
+  filtered.sort((a, b) => {
+    if (sort === 'price-low') return a.price - b.price;
+    if (sort === 'price-high') return b.price - a.price;
+    return a.name.localeCompare(b.name);
+  });
+
+  render();
+}
+
+function clearFilters() {
+  document.getElementById('search').value = '';
+  document.getElementById('brand-filter').value = '';
+  document.getElementById('sort').value = 'name';
+  currentCategory = "all";
+  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  document.querySelector('.tab-btn[data-category="all"]').classList.add('active');
+  filtered = [...products];
+  render();
+}
+
+document.querySelectorAll('.tab-btn').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentCategory = tab.dataset.category;
+    applyFilters();
+  });
+});
+function getCart() {
+  return JSON.parse(localStorage.getItem("cart") || "[]");
+}
+
+function saveCart(cart) {
+  localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+function updateCartCount() {
+  const count = getCart().reduce((sum, item) => sum + item.quantity, 0);
+  document.querySelectorAll("#cart-count").forEach(el => el.textContent = count);
+}
+
+function calculateItemPrice(item) {
+  return item.salePrice && item.salePrice < item.price ? item.salePrice : item.price;
+}
+// ──────────────────────────────────────────────
+//   MINIMIZE TOGGLE
+// ──────────────────────────────────────────────
+document.getElementById('toggle-floating').addEventListener('click', () => {
+  const cart = document.getElementById('floating-cart');
+  const icon = document.querySelector('#toggle-floating i');
+
+  cart.classList.toggle('minimized');
+
+  icon.classList.toggle('fa-chevron-up');
+  icon.classList.toggle('fa-chevron-down');
+});
+
+// ──────────────────────────────────────────────
+//   INIT
+// ──────────────────────────────────────────────
+render();
+updateCartCount();
+updateFloatingCart();
+</script>
+<script src="products.js"></script>
+<script>
+  const grid = document.getElementById("product-grid");
+
+  products.forEach(product => {
+    const card = document.createElement("div");
+    card.className = "product-card";
+
+    card.innerHTML = `
+      <img src="${product.image}" alt="${product.name}">
+      <h3>${product.name}</h3>
+      <p class="price">$${product.price}</p>
+    `;
+
+    card.onclick = () => {
+      window.location.href = `product.html?id=${product.id}`;
+    };
+
+    grid.appendChild(card);
+  });
+</script>
+<!-- PRODUCT DETAIL MODAL -->
+<div id="product-modal" class="modal">
+  <div class="modal-content glass">
+    <span class="close">&times;</span>
+
+    <h2 id="modal-title" style="font-size:3rem; margin-bottom:1rem;"></h2>
+
+    <div id="modal-images" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.5rem; margin-bottom:2rem;"></div>
+
+    <p id="modal-desc" style="font-size:1.6rem; line-height:1.7; opacity:0.9;"></p>
+
+    <div style="margin-top:3rem; text-align:center;">
+      <button class="btn" onclick="document.querySelector('.close').click()">CLOSE</button>
+      <div style="margin-top:3rem;">
+  <h3>Customer Reviews</h3>
+
+  <div id="reviews"></div>
+
+  <div style="margin-top:2rem;">
+    <select id="rating">
+      <option value="5">★★★★★</option>
+      <option value="4">★★★★☆</option>
+      <option value="3">★★★☆☆</option>
+      <option value="2">★★☆☆☆</option>
+      <option value="1">★☆☆☆☆</option>
+    </select>
+
+    <textarea id="reviewText" class="input" placeholder="Write your review..."></textarea>
+
+    <button class="btn" onclick="submitReview()">SUBMIT REVIEW</button>
+  </div>
+</div>
+    </div>
+  </div>
+</div>
+</body>
+<footer style="background:rgba(10,10,30,0.9); padding:3rem 5%; text-align:center; border-top:1px solid #ff6b00; margin-top:4rem;">
+  <div class="trust-badges" style="display:flex; justify-content:center; gap:2rem; flex-wrap:wrap; margin-bottom:2rem;">
+    <!-- Replace src with your hosted images or free CDN links -->
+    <img src="https://trustlock.co/wp-content/uploads/2019/01/ssl-secure-checkout-trust-badge-icon.png" alt="SSL Secure" width="140" loading="lazy">
+    <img src="https://tse3.mm.bing.net/th/id/OIP.S8wuoyNOknSddf2ZACZeBAHaB5?pid=Api&P=0&h=220" alt="Powered by Stripe" width="120" loading="lazy">
+    <span style="font-size:1.4rem; color:#ff6b00; align-self:center;">30-Day Returns • Secure Payments</span>
+  </div>
+
+  <p style="font-size:1.3rem; margin:1rem 0;">
+    © 2026 HUNTX | Newport, Tennessee
+  </p>
+
+  <p style="font-size:1.2rem; opacity:0.9;">
+    <a href="privacy.html" style="color:#ff6b00; margin:0 1rem;">Privacy Policy</a> |
+    <a href="terms.html" style="color:#ff6b00; margin:0 1rem;">Terms of Service</a> |
+    <a href="returns.html" style="color:#ff6b00; margin:0 1rem;">Returns & Refunds</a> |
+    <a href="contact.html" style="color:#ff6b00; margin:0 1rem;">Contact Us</a>
+  </p>
+
+  <div style="margin-top:1.5rem;">
+    <a href="https://www.instagram.com/huntx.co" target="_blank" style="color:#ff6b00; font-size:1.8rem; margin:0 1rem;"><i class="fab fa-instagram"></i></a>
+    <a href="https://x.com/huntxgear" target="_blank" style="color:#ff6b00; font-size:1.8rem; margin:0 1rem;"><i class="fab fa-x-twitter"></i></a>
+    <!-- Add YouTube/TikTok if active -->
+  </div>
+
+  <p style="margin-top:2rem; font-size:1.1rem; opacity:0.7;">Elite gear for extreme hunts and frontier missions. Built in the USA.</p>
+</footer>
+</html>

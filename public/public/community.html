@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Community | HUNTX</title>
+
+  <!-- Shared site styles -->
+  <link rel="stylesheet" href="style.css" />
+  <!-- Frontier / Community overrides -->
+  <link rel="stylesheet" href="frontier.css" />
+  <link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body class="frontier-page">
+
+  <!-- BACKGROUND -->
+  <div class="bg"></div>
+
+  <!-- HEADER -->
+  <header>
+    <h1>HUNTX</h1>
+    <nav>
+      <a href="index.html">HOME</a>
+      <a href="shop.html">SYSTEMS</a>
+      <a href="frontier.html">FRONTIER</a>
+      <a class="active">COMMUNITY</a>
+      <a href="cart.html">MISSION KIT</a>
+    </nav>
+  </header>
+
+  <!-- CONTENT -->
+  <main class="container">
+
+    <!-- HERO -->
+    <section class="glass hero-panel">
+      <h2>THE COMMUNITY</h2>
+      <p class="mission-subtitle">
+        A private network for engineers, operators, and explorers building beyond Earth.
+      </p>
+
+      <a href="#apply" class="btn community-btn">
+        REQUEST ACCESS
+      </a>
+    </section>
+
+    <!-- WHY -->
+    <section class="glass">
+      <h3>Why This Exists</h3>
+      <p class="mission-text">
+        The HUNTX Community is not social media.  
+        It’s a controlled environment for collaboration, research sharing, and mission planning.
+      </p>
+
+      <p class="mission-text">
+        Members include system engineers, field operators, researchers, and partners preparing for
+        extreme and off-world operations.
+      </p>
+    </section>
+
+    <!-- TIERS -->
+    <section class="glass">
+      <h3>Access Levels</h3>
+
+      <div class="community-grid">
+        <div class="community-card">
+          <h4>Explorer</h4>
+          <p>Early access, mission updates, and system previews.</p>
+        </div>
+
+        <div class="community-card">
+          <h4>Engineer</h4>
+          <p>Technical discussions, design collaboration, and research channels.</p>
+        </div>
+
+        <div class="community-card">
+          <h4>Partner</h4>
+          <p>Direct coordination, private briefings, and mission-level access.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- APPLY -->
+    <section class="glass" id="apply">
+      <h3>Request Access</h3>
+      <p class="mission-text">
+        Access is reviewed manually.  
+        This is intentional.
+      </p>
+
+      <form class="community-form">
+        <input type="email" class="input" placeholder="Email address" required />
+        <input type="text" class="input" placeholder="Role / Background" required />
+        <button type="submit" class="btn community-btn">
+          
+          <a href="summit.html" class="btn">Summit Request</a>
+
+        </button>
+        <p class="mission-tags">ACCESS IS REVIEWED · LIMITED ENTRY</p>
+      </form>
+    </section>
+
+  </main>
+
+  <footer>
+    © <span id="year"></span> HUNTX
+  </footer>
+
+    <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

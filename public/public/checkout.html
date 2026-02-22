@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Stripe FIRST -->
+<script src="https://js.stripe.com/v3/"></script>
+
+<!-- App JS AFTER -->
+<script defer src="script.js"></script>
+  
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout | HUNTX</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+</head>
+<body>
+  <video id="bgVideo" autoplay muted loop playsinline></video>
+  <button id="themeToggle"><i class="fa-solid fa-moon"></i></button>
+
+  <header>
+    <h1>HUNTX</h1>
+    <nav>
+  <a href="index.html">HOME</a>
+  <a href="shop.html">ARMORY</a>
+  <a href="cart.html" class="active">LOADOUT (<span id="cart-count">0</span>)</a>
+  <span id="user-info"><a href="login.html">LOGIN</a></span>   <!-- ← ADD THIS -->
+</nav>
+  </header>
+
+  <div class="container" style="text-align:center;padding-top:80px;">
+    <h2 style="font-size:clamp(3.5rem, 12vw, 7rem);margin:2rem 0;">FINALIZE ORDER</h2>
+<div style="font-size:clamp(2.2rem, 8vw, 4rem);color:#ff6b00;margin:3rem 0;"><span id="cart-total"></span></div>
+<button id="checkout-button" class="btn" style="padding:2rem 10rem;font-size:2.5rem;margin:4rem auto;display:block;">
+  PAY SECURELY WITH STRIPE
+</button>
+<p style="font-size:1.2rem; margin:1rem 0;">
+  By completing your order, you agree to our 
+  <a href="terms.html" style="color:#ff6b00;">Terms</a>, 
+  <a href="privacy.html" style="color:#ff6b00;">Privacy Policy</a>, and 
+  <a href="returns.html" style="color:#ff6b00;">Returns Policy</a>.
+</p>
+<div class="trust-badges" style="text-align:center; margin:2rem 0; display:flex; justify-content:center; gap:1.5rem; flex-wrap:wrap;">
+  <img src="https://trustlock.co/wp-content/uploads/2019/01/ssl-secure-checkout-trust-badge-icon.png" alt="SSL Secure Checkout" width="150" height="70" loading="lazy">
+  <img src="https://your-hosted-stripe-logo.png" alt="Pay with Stripe" width="120">
+  <img src="https://example.com/visa-mastercard-icons.png" alt="Accepted Cards" width="180">
+  <span style="font-size:1.2rem; color:#ff6b00;">30-Day Returns • Secure Payments</span>
+</div>
+    <p id="msg" style="font-size:2rem;color:#ff6b00;height:4rem;"></p>
+  </div>
+</body>
+</html>
