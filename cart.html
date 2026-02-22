@@ -6,32 +6,184 @@
   <title>LOADOUT | HUNTX</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
-  <!-- In cart.html <head> or before </body> -->
-<script src="products.js"></script>
-<script src="script.js"></script>   <!-- after products.js -->
+  <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
-  <video id="bgVideo" autoplay muted loop playsinline></video>
-  <button id="themeToggle"><i class="fa-solid fa-moon"></i></button>
 
-  <header>
-    <h1>HUNTX</h1>
-    <nav>
-      <a href="index.html">HOME</a>
-      <a href="shop.html">ARMORY</a>
-      <a href="cart.html">LOADOUT (<span id="cart-count">0</span>)</a>
-      <span id="user-info"><a href="login.html">LOGIN</a></span>
-    </nav>
-  </header>
+<header>
+  <h1>HUNTX</h1>
+  <nav>
+  <a href="index.html">HOME</a>
+  <a href="shop.html">ARMORY</a>
+  <a href="cart.html" class="active">LOADOUT (<span id="cart-count">0</span>)</a>
+  <span id="user-info"><a href="login.html">LOGIN</a></span>   <!-- ← ADD THIS -->
+</nav>
+</header>
 
-  <div class="container">
-    <h2 style="text-align:center;margin:3rem 0;font-size:clamp(2.5rem, 10vw, 4.5rem);">YOUR LOADOUT</h2>
-    <div id="cart-items"></div>
-    <div style="text-align:center;margin:4rem 0;">
-      <h3 style="font-size:clamp(2rem, 8vw, 3.5rem);color:#ff6b00;">TOTAL: $<span id="cart-total">0.00</span></h3>
-<button onclick="location.href='checkout.html'" class="btn" style="padding:1.8rem 6rem;font-size:2rem;margin-top:2rem;">PROCEED TO CHECKOUT</button>
+<div class="container">
+  <div class="glass" style="padding: 4rem 3rem; max-width: 1200px; margin: 0 auto;">
+    <h2 style="font-size: 5rem; text-align: center; margin-bottom: 4rem; background: linear-gradient(45deg, #ff6b00, #ffb800); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+      YOUR LOADOUT
+    </h2>
+
+    <!-- CART ITEMS -->
+    <div id="cart-items" style="display: grid; gap: 2.5rem; margin-bottom: 4rem;"></div>
+
+    <!-- EMPTY STATE -->
+    <div id="empty-cart" style="text-align: center; font-size: 2.2rem; opacity: 0.7; display: none;">
+      <p>Your loadout is empty.</p>
+      <a href="shop.html" class="btn" style="margin-top: 2rem; font-size: 1.8rem; padding: 1.5rem 3rem;">ENTER ARMORY</a>
+    </div>
+
+    <!-- SUMMARY -->
+    <div id="cart-summary" style="display: none;">
+      <div style="display:flex; justify-content:space-between; font-size:2rem; margin-bottom:2rem;">
+        <span>SUBTOTAL</span>
+        <span id="cart-subtotal">$0.00</span>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; font-size:2.4rem; font-weight:bold; margin-bottom:3rem; color:#ff6b00;">
+        <span>TOTAL</span>
+        <span id="cart-total">$0.00</span>
+      </div>
+
+      <button id="checkout-btn" class="btn" style="width:100%; font-size:2rem; padding:1.8rem;">SECURE CHECKOUT</button>
+    </div>
   </div>
+</div>
 
-  <script src="script.js"></script>
+<footer>© 2025 HUNTX</footer>
+
+<script src="script.js"></script>
+
+<script>
+// ────────────────────────────────────────────────
+// CART RENDER
+// ────────────────────────────────────────────────
+function renderCart() {
+  const cartItemsEl = document.getElementById("cart-items");
+  const emptyCartEl = document.getElementById("empty-cart");
+  const summaryEl = document.getElementById("cart-summary");
+  if (!cartItemsEl || !emptyCartEl || !summaryEl) return;
+
+  const cart = getCart();
+  if (cart.length === 0) {
+    emptyCartEl.style.display = "block";
+    summaryEl.style.display = "none";
+    return;
+  }
+
+  emptyCartEl.style.display = "none";
+  summaryEl.style.display = "block";
+
+  let total = 0;
+
+  cartItemsEl.innerHTML = cart.map((item, index) => {
+    const itemPrice = calculateItemPrice(item);
+    const subtotal = itemPrice * item.quantity;
+    total += subtotal;
+
+    return `
+      <div class="cart-item glass" style="display:grid; grid-template-columns:80px 1fr auto; gap:2rem; align-items:center; padding:2rem; border-radius:24px;">
+        <img src="${item.image}" style="width:100%; border-radius:12px;">
+        <div>
+          <h3 style="font-size:2.2rem;">${item.name}</h3>
+          <div style="font-size:1.8rem; color:#ff6b00;">$${itemPrice.toFixed(2)}</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:1.5rem; font-size:2rem;">
+          <button onclick="updateQuantity(${index}, -1)" style="background:none; border:none; color:#fff; cursor:pointer; font-size:2.5rem;">−</button>
+          <span>${item.quantity}</span>
+          <button onclick="updateQuantity(${index}, 1)" style="background:none; border:none; color:#fff; cursor:pointer; font-size:2.5rem;">+</button>
+          <button onclick="removeFromCart(${index})" style="background:none; border:none; color:#ff6b00; cursor:pointer; font-size:2rem;"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  document.getElementById("cart-subtotal").textContent = `$${total.toFixed(2)}`;
+  document.getElementById("cart-total").textContent = `$${total.toFixed(2)}`; // Add shipping/tax logic if needed
+}
+
+// ────────────────────────────────────────────────
+// CART ACTIONS
+// ────────────────────────────────────────────────
+function updateQuantity(index, change) {
+  const cart = getCart();
+  cart[index].quantity += change;
+  if (cart[index].quantity < 1) cart[index].quantity = 1;
+  saveCart(cart);
+  renderCart();
+  updateCartCount();
+}
+
+function removeFromCart(index) {
+  const cart = getCart();
+  cart.splice(index, 1);
+  saveCart(cart);
+  renderCart();
+  updateCartCount();
+}
+
+// ────────────────────────────────────────────────
+// CHECKOUT HANDLER
+// ────────────────────────────────────────────────
+async function handleCheckout() {
+  const token = localStorage.getItem('token');
+  
+  if (!token) {
+    alert('Please log in to checkout');
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const cart = getCart();
+  if (cart.length === 0) return alert('Loadout empty');
+
+  try {
+    const res = await fetch(`${API_BASE}/api/create-checkout-session`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`   // ← THIS WAS MISSING
+      },
+      body: JSON.stringify({
+        items: cart.map(item => ({
+          name: item.name,
+          price: calculateItemPrice(item),
+          quantity: item.quantity
+        }))
+      })
+    });
+
+    const data = await res.json();
+    
+    if (!res.ok) {
+      console.error("Server error:", data);
+      throw new Error(data.error || "Checkout failed");
+    }
+
+    const stripe = await stripePromise;
+    if (!stripe) throw new Error("Stripe not loaded");
+
+    const { error } = await stripe.redirectToCheckout({ sessionId: data.sessionId });
+    if (error) throw error;
+  } catch (err) {
+    console.error("Checkout error:", err);
+    alert("Checkout failed: " + err.message);
+  }
+}
+// ──────────────────────────────────────────────
+//   INIT
+// ──────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+  renderCart();
+
+  const checkoutBtn = document.getElementById("checkout-btn");
+  if (checkoutBtn) {
+    checkoutBtn.addEventListener("click", handleCheckout);
+  }
+});
+</script>
+
 </body>
 </html>

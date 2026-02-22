@@ -1,12 +1,13 @@
+// script.js (updated)
 
+// ────────────────────────────────────────────────
+// API BASE + STRIPE INIT
+// ────────────────────────────────────────────────
 const API_BASE =
   location.hostname === "localhost"
     ? "http://localhost:10000"
     : "https://drop-xpress.onrender.com";
 
-// ────────────────────────────────────────────────
-// Stripe initialization
-// ────────────────────────────────────────────────
 let stripePromise = fetch(`${API_BASE}/api/config`)
   .then(r => {
     if (!r.ok) throw new Error("Config fetch failed");
@@ -22,70 +23,7 @@ let stripePromise = fetch(`${API_BASE}/api/config`)
   });
 
 // ────────────────────────────────────────────────
-// SHOP RENDER
-// ────────────────────────────────────────────────
-function renderShop() {
-  const grid = document.getElementById("products-grid");
-  if (!grid) return;
-
-  const list = window.filtered || products;
-
-  grid.innerHTML = list.map(p => `
-    <a href="product.html?id=${p.id}" class="product-card glass" style="text-decoration:none;color:inherit;">
-      <img src="${p.image}" loading="lazy" alt="${p.name}">
-      <div class="product-info">
-        <h3>${p.name}</h3>
-        <div class="price-tag">$${p.price}</div>
-      </div>
-    </a>
-  `).join("");
-}
-
-// ────────────────────────────────────────────────
-// FILTERS & SORT
-// ────────────────────────────────────────────────
-function applyFilters() {
-  const q = document.getElementById('search')?.value.toLowerCase() || '';
-  const brand = document.getElementById('brand-filter')?.value || '';
-  const sort = document.getElementById('sort')?.value || 'name';
-
-  window.filtered = products.filter(p => {
-    const matchesSearch =
-      p.name.toLowerCase().includes(q) ||
-      p.brand.toLowerCase().includes(q);
-
-    const matchesBrand = !brand || p.brand === brand;
-    const matchesCategory =
-      currentCategory === "all" || p.category === currentCategory;
-
-    return matchesSearch && matchesBrand && matchesCategory;
-  });
-
-  window.filtered.sort((a, b) => {
-    if (sort === 'price-low') return a.price - b.price;
-    if (sort === 'price-high') return b.price - a.price;
-    return a.name.localeCompare(b.name);
-  });
-
-  renderShop();
-}
-
-function clearFilters() {
-  document.getElementById('search').value = '';
-  document.getElementById('brand-filter').value = '';
-  document.getElementById('sort').value = 'name';
-
-  window.currentCategory = "all";
-  window.filtered = [...products];
-
-  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
-  document.querySelector('.tab-btn[data-category="all"]')?.classList.add('active');
-
-  renderShop();
-}
-
-// ────────────────────────────────────────────────
-// CART STORAGE
+// CART HELPERS
 // ────────────────────────────────────────────────
 function getCart() {
   return JSON.parse(localStorage.getItem("cart") || "[]");
@@ -97,26 +35,31 @@ function saveCart(cart) {
 
 function updateCartCount() {
   const count = getCart().reduce((sum, item) => sum + item.quantity, 0);
-  document.querySelectorAll("#cart-count").forEach(el => {
-    el.textContent = count;
-  });
+  document.querySelectorAll("#cart-count").forEach(el => el.textContent = count);
 }
 
-// ────────────────────────────────────────────────
-// CART HELPERS
-// ────────────────────────────────────────────────
 function calculateItemPrice(item) {
-  return item.salePrice && item.salePrice < item.price
-    ? item.salePrice
-    : item.price;
+  return item.salePrice && item.salePrice < item.price ? item.salePrice : item.price;
 }
 
-function addToCart(event, id) {
-  let cart = getCart();
+// ────────────────────────────────────────────────
+// ADD TO CART (with login check)
+// ────────────────────────────────────────────────
+function addToCart(id) {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    if (confirm('Login required to add to cart. Redirect to login?')) {
+      window.location.href = 'login.html';
+    }
+    return;
+  }
+
   const product = products.find(p => p.id === id);
   if (!product) return;
 
+  const cart = getCart();
   const existing = cart.find(i => i.id === id);
+
   if (existing) {
     existing.quantity += 1;
   } else {
@@ -125,328 +68,278 @@ function addToCart(event, id) {
 
   saveCart(cart);
   updateCartCount();
-  updateFloatingCart();
-
-  if (event?.target) {
-    const btn = event.target;
-    const original = btn.textContent;
-    btn.textContent = "ADDED!";
-    btn.style.background = "#2d8b3a";
-    setTimeout(() => {
-      btn.textContent = original;
-      btn.style.background = "";
-    }, 1200);
-  }
-}
-
-function removeFromCart(index) {
-  let cart = getCart();
-  cart.splice(index, 1);
-  saveCart(cart);
-  updateCartCount();
-  renderCartAndCheckout();
-  updateFloatingCart();
-}
-
-function changeQuantity(index, delta) {
-  let cart = getCart();
-  if (!cart[index]) return;
-
-  cart[index].quantity = Math.max(1, cart[index].quantity + delta);
-  saveCart(cart);
-
-  updateCartCount();
-  renderCartAndCheckout();
-  updateFloatingCart();
+  alert(`${product.name} added to loadout!`);
 }
 
 // ────────────────────────────────────────────────
-// CART PAGE RENDER
+// RENDER CART (for cart.html)
 // ────────────────────────────────────────────────
-function renderCartAndCheckout() {
+function renderCart() {
+  const cartItemsEl = document.getElementById("cart-items");
+  const emptyCartEl = document.getElementById("empty-cart");
+  const summaryEl = document.getElementById("cart-summary");
+  if (!cartItemsEl || !emptyCartEl || !summaryEl) return;
+
   const cart = getCart();
-  const cartContainer = document.getElementById("cart-items");
-  const totalEl = document.getElementById("cart-total");
-
-  if (!cartContainer || !totalEl) return;
-
-  let html = "";
-  let total = 0;
-
   if (cart.length === 0) {
-    html = `
-      <p style="text-align:center;font-size:3rem;opacity:.7;margin:6rem 0;">
-        Your loadout is empty.<br>
-        <a href="shop.html" style="color:#ff6b00;text-decoration:none;font-size:1.8rem;">
-          ← Continue Shopping
-        </a>
-      </p>`;
-  } else {
-    cart.forEach((item, index) => {
-      const price = calculateItemPrice(item);
-      const lineTotal = price * item.quantity;
-      total += lineTotal;
-
-      html += `
-        <div class="cart-item glass" style="display:flex;gap:2rem;padding:2rem;margin-bottom:2rem;">
-          <img src="${item.image}" style="width:180px;border-radius:16px;">
-          <div style="flex:1;">
-            <h3 style="font-size:2.5rem;">${item.name}</h3>
-            <div style="color:#aaa;">${item.category || ''}</div>
-            <div style="color:#ff6b00;font-size:2rem;">
-              $${price} × ${item.quantity}
-            </div>
-            <div style="margin:1rem 0;">
-              <button onclick="changeQuantity(${index},-1)" class="btn">−</button>
-              <span style="margin:0 1rem;">${item.quantity}</span>
-              <button onclick="changeQuantity(${index},1)" class="btn">+</button>
-            </div>
-            <button onclick="removeFromCart(${index})" class="btn" style="background:#e74c3c;">
-              Remove
-            </button>
-          </div>
-          <div style="font-size:3rem;color:#ff6b00;">
-            $${lineTotal.toFixed(2)}
-          </div>
-        </div>`;
-    });
-
-    html += `
-      <div style="text-align:right;font-size:4rem;color:#ff6b00;">
-        TOTAL: $${total.toFixed(2)}
-      </div>`;
-  }
-
-  cartContainer.innerHTML = html;
-  totalEl.textContent = total.toFixed(2);
-}
-
-// ────────────────────────────────────────────────
-// FLOATING CART
-// ────────────────────────────────────────────────
-function updateFloatingCart() {
-  const container = document.getElementById("floating-cart");
-  if (!container) return;
-
-  const cart = getCart();
-  if (!cart.length) {
-    container.classList.remove("show");
+    emptyCartEl.style.display = "block";
+    summaryEl.style.display = "none";
     return;
   }
 
-  const total = cart.reduce(
-    (s, i) => s + calculateItemPrice(i) * i.quantity,
-    0
-  );
+  emptyCartEl.style.display = "none";
+  summaryEl.style.display = "block";
 
-  const itemCount = cart.reduce((s, i) => s + i.quantity, 0);
-  const minimized = localStorage.getItem("cartMinimized") === "true";
+  let total = 0;
 
-  container.classList.add("show");
-  container.classList.toggle("minimized", minimized);
+  cartItemsEl.innerHTML = cart.map((item, index) => {
+    const itemPrice = calculateItemPrice(item);
+    const subtotal = itemPrice * item.quantity;
+    total += subtotal;
 
-  container.innerHTML = `
-    <div style="text-align:center;font-weight:900;">
-      YOUR LOADOUT (${itemCount})
-      <button id="minimize-cart-btn">${minimized ? '+' : '−'}</button>
-    </div>
-
-    <div style="${minimized ? 'display:none;' : ''}">
-      ${cart.map((item, i) => `
-        <div style="display:flex;gap:.5rem;margin:1rem 0;">
-          <img src="${item.image}" style="width:50px;border-radius:10px;">
-          <div style="flex:1;">
-            ${item.name}<br>
-            $${calculateItemPrice(item)} × ${item.quantity}
-          </div>
-          <button onclick="removeFromCart(${i})">×</button>
+    return `
+      <div class="cart-item glass" style="display:grid; grid-template-columns:80px 1fr auto; gap:2rem; align-items:center; padding:2rem; border-radius:24px;">
+        <img src="${item.image}" style="width:100%; border-radius:12px;">
+        <div>
+          <h3 style="font-size:2.2rem;">${item.name}</h3>
+          <div style="font-size:1.8rem; color:#ff6b00;">$${itemPrice.toFixed(2)}</div>
         </div>
-      `).join('')}
-    </div>
+        <div style="display:flex; align-items:center; gap:1.5rem; font-size:2rem;">
+          <button onclick="updateQuantity(${index}, -1)" style="background:none; border:none; color:#fff; cursor:pointer; font-size:2.5rem;">−</button>
+          <span>${item.quantity}</span>
+          <button onclick="updateQuantity(${index}, 1)" style="background:none; border:none; color:#fff; cursor:pointer; font-size:2.5rem;">+</button>
+          <button onclick="removeFromCart(${index})" style="background:none; border:none; color:#ff6b00; cursor:pointer; font-size:2rem;"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </div>
+    `;
+  }).join("");
 
-    <div style="text-align:center;">
-      TOTAL: $${total.toFixed(2)}
-      <button onclick="location.href='checkout.html'" class="btn">
-        CHECKOUT
-      </button>
-    </div>
-  `;
-
-  document.getElementById("minimize-cart-btn")?.addEventListener("click", () => {
-    const m = container.classList.toggle("minimized");
-    localStorage.setItem("cartMinimized", m);
-    updateFloatingCart();
-  });
+  document.getElementById("cart-subtotal").textContent = `$${total.toFixed(2)}`;
+  document.getElementById("cart-total").textContent = `$${total.toFixed(2)}`; // Add shipping/tax logic if needed
 }
 
 // ────────────────────────────────────────────────
-// AUTH HELPERS
+// CART ACTIONS
 // ────────────────────────────────────────────────
-function getToken() {
-  return localStorage.getItem("token");
+function updateQuantity(index, change) {
+  const cart = getCart();
+  cart[index].quantity += change;
+  if (cart[index].quantity < 1) cart[index].quantity = 1;
+  saveCart(cart);
+  renderCart();
+  updateCartCount();
 }
 
-function showUserStatus() {
-  // ← Add your logic here if you have a UI element for logged-in status
-  // Example: document.getElementById('user-status').textContent = getToken() ? 'Logged in' : 'Guest';
+function removeFromCart(index) {
+  const cart = getCart();
+  cart.splice(index, 1);
+  saveCart(cart);
+  renderCart();
+  updateCartCount();
 }
 
 // ────────────────────────────────────────────────
-// CHECKOUT – FIXED: removed image from payload to avoid 413 Payload Too Large
+// CHECKOUT HANDLER (with login check)
 // ────────────────────────────────────────────────
 async function handleCheckout() {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    alert('Login required for checkout. Redirecting...');
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const cart = getCart();
+  if (cart.length === 0) return alert('Loadout empty');
+
   try {
-    const stripe = await stripePromise;
-    if (!stripe) {
-      alert("Stripe failed to load");
-      return;
-    }
-
-    const cart = getCart();
-    if (!cart.length) {
-      alert("Your cart is empty");
-      return;
-    }
-
-    const token = getToken();  // ← from your existing getToken() function
-
-    if (!token) {
-      alert("Please log in to checkout");
-      // Optional: redirect to login page
-      // location.href = "login.html";
-      return;
-    }
-
     const res = await fetch(`${API_BASE}/api/create-checkout-session`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`   // ← this line fixes it
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({
-        items: cart.map(i => ({
-          name: i.name,
-          // image: i.image,  // already removed earlier
-          price: Number(calculateItemPrice(i)),
-          quantity: Number(i.quantity)
+        items: cart.map(item => ({
+          name: item.name,
+          price: calculateItemPrice(item),
+          quantity: item.quantity
         }))
       })
     });
 
-    // ... rest of the function unchanged
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Checkout failed");
 
+    const stripe = await stripePromise;
+    if (!stripe) throw new Error("Stripe not loaded");
+
+    const { error } = await stripe.redirectToCheckout({ sessionId: data.sessionId });
+    if (error) throw error;
   } catch (err) {
     console.error("Checkout error:", err);
-    alert("Checkout failed — check console for details");
+    alert("Checkout failed: " + err.message);
   }
 }
-// ────────────────────────────────────────────────
-// INIT
-// ────────────────────────────────────────────────
-document.addEventListener("DOMContentLoaded", () => {
-  // Shop filters setup
-  if (typeof products !== "undefined") {
-    const brands = [...new Set(products.map(p => p.brand))].sort();
-    const brandSelect = document.getElementById("brand-filter");
-    if (brandSelect) {
-      brandSelect.innerHTML += brands
-        .map(b => `<option value="${b}">${b}</option>`)
-        .join("");
-    }
 
-    document.querySelectorAll(".tab-btn").forEach(tab => {
-      tab.addEventListener("click", () => {
-        document.querySelectorAll(".tab-btn").forEach(t => t.classList.remove("active"));
-        tab.classList.add("active");
-        window.currentCategory = tab.dataset.category;
-        applyFilters();
-      });
-    });
+// ────────────────────────────────────────────────
+// AUTH & USER STATUS
+// ────────────────────────────────────────────────
+function getUserEmailFromToken(token) {
+  try {
+    const payload = token.split('.')[1];
+    const decoded = atob(payload);
+    const { email } = JSON.parse(decoded);
+    return email || 'User';
+  } catch {
+    return null;
   }
+}
 
-  // Login
-  document.getElementById("login")?.addEventListener("click", async () => {
-    const email = document.getElementById("email")?.value.trim();
-    const password = document.getElementById("password")?.value;
-    const msg = document.getElementById("msg");
+function showUserStatus() {
+  const token = localStorage.getItem('token');
+  const userInfo = document.getElementById('user-info');
+  
+  if (!userInfo) return; // page doesn't have this element
 
-    if (!email || !password) {
-      msg.textContent = "Please fill all fields";
-      return;
-    }
+  if (token) {
+    const email = getUserEmailFromToken(token);
+    userInfo.innerHTML = `
+      ${email} | 
+      <a href="#" id="logout">LOGOUT</a>
+    `;
+    document.getElementById('logout')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.removeItem('token');
+      showUserStatus();
+      alert('Logged out');
+      window.location.href = 'index.html';
+    });
+  } else {
+    userInfo.innerHTML = `<a href="login.html">LOGIN</a>`;
+  }
+}
+
+// In DOMContentLoaded listener (add this line if missing):
+document.addEventListener("DOMContentLoaded", () => {
+  showUserStatus();          // ← ADD THIS
+  updateCartCount();
+  // ... other inits
+});
+function logout(e) {
+  e.preventDefault();
+  localStorage.removeItem('token');
+  showUserStatus();
+  alert('Logged out');
+  if (location.pathname.includes('profile.html')) window.location.href = 'index.html';
+}
+
+// ────────────────────────────────────────────────
+// LOGIN HANDLER
+// ────────────────────────────────────────────────
+const loginForm = document.getElementById('loginForm');
+if (loginForm) {
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('emailInput').value;
+    const password = document.getElementById('passwordInput').value;
+    const msgEl = document.getElementById('msg');
 
     try {
       const res = await fetch(`${API_BASE}/api/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-
-      if (!res.headers.get("content-type")?.includes("application/json")) {
-        throw new Error("Server returned non-JSON response");
-      }
-
       const data = await res.json();
-
-      if (!res.ok) {
-        msg.textContent = data.message || "Login failed";
-        return;
-      }
-
-      localStorage.setItem("token", data.token);
-      location.href = "index.html";
+      if (!res.ok) throw new Error(data.message || 'Login failed');
+      localStorage.setItem('token', data.token);
+      msgEl.textContent = 'Login successful! Redirecting...';
+      msgEl.style.color = '#2d8b3a';
+      setTimeout(() => window.location.href = 'shop.html', 1500);
     } catch (err) {
-      console.error(err);
-      msg.textContent = err.message || "Connection error";
+      msgEl.textContent = err.message;
+      msgEl.style.color = '#ff6b00';
     }
   });
+}
 
-  // Register
-  document.getElementById("register")?.addEventListener("click", async () => {
-    const email = document.getElementById("newEmail")?.value.trim();
-    const password = document.getElementById("newPassword")?.value;
-    const msg = document.getElementById("msg");
-
-    if (!email || !password) {
-      msg.textContent = "Please fill all fields";
-      return;
-    }
+// ────────────────────────────────────────────────
+// REGISTER HANDLER
+// ────────────────────────────────────────────────
+const registerForm = document.getElementById('registerForm');
+if (registerForm) {
+  registerForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('newEmail').value;
+    const password = document.getElementById('newPassword').value;
+    const msgEl = document.getElementById('msg');
 
     try {
       const res = await fetch(`${API_BASE}/api/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-
-      if (!res.headers.get("content-type")?.includes("application/json")) {
-        throw new Error("Server returned non-JSON response");
-      }
-
       const data = await res.json();
-
-      if (!res.ok) {
-        msg.textContent = data.message || "Registration failed";
-        return;
-      }
-
-      localStorage.setItem("token", data.token);
-      location.href = "index.html";
+      if (!res.ok) throw new Error(data.message || 'Registration failed');
+      localStorage.setItem('token', data.token);
+      msgEl.textContent = 'Registration successful! Redirecting...';
+      msgEl.style.color = '#2d8b3a';
+      setTimeout(() => window.location.href = 'shop.html', 1500);
     } catch (err) {
-      console.error(err);
-      msg.textContent = err.message || "Connection error";
+      msgEl.textContent = err.message;
+      msgEl.style.color = '#ff6b00';
     }
   });
+}
 
-  // Checkout button(s)
-  const checkoutBtn = document.getElementById("checkout-button") ||
-                      document.getElementById("checkout-btn");
-  checkoutBtn?.addEventListener("click", handleCheckout);
+// ────────────────────────────────────────────────
+// PROFILE HANDLER (for profile.html)
+// ────────────────────────────────────────────────
+async function loadProfile() {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    document.getElementById('profileData').innerHTML = '<p>Please login to view profile.</p>';
+    return;
+  }
 
-  // Initial renders
-  updateCartCount();
-  renderShop();
-  renderCartAndCheckout();
-  updateFloatingCart();
+  try {
+    const res = await fetch(`${API_BASE}/api/profile`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to load profile');
+    document.getElementById('profileData').innerHTML = `<p>Email: ${data.user.email}</p>`;
+  } catch (err) {
+    document.getElementById('profileData').innerHTML = `<p>Error: ${err.message}</p>`;
+  }
+}
+
+// ────────────────────────────────────────────────
+// CHECKOUT.HTML SPECIFIC (render total + attach button)
+// ────────────────────────────────────────────────
+if (document.getElementById('cart-total')) {
+  const total = getCart().reduce((sum, item) => sum + calculateItemPrice(item) * item.quantity, 0);
+  document.getElementById('cart-total').textContent = `$${total.toFixed(2)}`;
+}
+
+const checkoutButton = document.getElementById('checkout-button');
+if (checkoutButton) {
+  checkoutButton.addEventListener('click', handleCheckout);
+}
+
+// ────────────────────────────────────────────────
+// GLOBAL INIT (run on all pages)
+// ────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
   showUserStatus();
+  updateCartCount();
+
+  // Page-specific inits
+  if (document.getElementById("cart-items")) renderCart();
+  if (document.getElementById("profileData")) loadProfile();
+
+  // Cart quantity buttons (if on cart.html)
+  // Reviews logic on product.html is already in inline script
 });
