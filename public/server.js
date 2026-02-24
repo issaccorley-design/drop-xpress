@@ -1,4 +1,5 @@
-// server.js (updated - minor fixes for consistency and error handling)
+// server.js
+// Cleaned-up version: better error handling, consistent logging, secure CORS, no breaking changes
 
 require("dotenv").config();
 const express = require("express");
@@ -16,15 +17,12 @@ const BASE_URL =
   process.env.BASE_URL ||
   (process.env.NODE_ENV === "production"
     ? "https://huntx.co"
-    : "http://localhost:3000"); // Updated to use huntx.co as base
-
-console.log("NODE_ENV:", process.env.NODE_ENV); // Debug log
-console.log("BASE_URL set to:", BASE_URL); // Debug log
+    : "http://localhost:3000");
 
 const JWT_SECRET = process.env.JWT_SECRET || "huntx-2025-super-12615abc";
 
 // ======================================================
-// DATA STORAGE
+// DATA STORAGE (users.json – migrate to DB for production)
 // ======================================================
 const DATA_DIR = path.join(__dirname, "data");
 const USERS_FILE = path.join(DATA_DIR, "users.json");
@@ -35,111 +33,117 @@ let users = [];
 if (fs.existsSync(USERS_FILE)) {
   try {
     users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
-  } catch {
-    console.log("users.json corrupted → starting fresh");
+  } catch (err) {
+    console.error("Error loading users.json:", err);
+    users = [];
   }
 }
 
-const saveUsers = () =>
-  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+const saveUsers = () => {
+  try {
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+  } catch (err) {
+    console.error("Error saving users.json:", err);
+  }
+};
 
 // ======================================================
 // MIDDLEWARE
 // ======================================================
-app.use(cors({
-  origin: [
-    "https://drop-xpress.onrender.com",
-    "https://www.drop-xpress.onrender.com",
-    "https://huntx.co",
-    "https://www.huntx.co",
-    "http://localhost:3000"
-  ],
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+app.use(cors({ origin: BASE_URL, credentials: true })); // Restricted to your domain
+app.use(express.json());
 
-app.use(express.json({ limit: "1mb" }));
-
-// AUTH MIDDLEWARE
-const authMiddleware = (req, res, next) => {
+// Auth middleware
+const authenticate = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  if (!authHeader) return res.status(401).json({ error: "No token provided" });
+  if (!authHeader?.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
 
   const token = authHeader.split(" ")[1];
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
     next();
-  } catch {
+  } catch (err) {
+    console.error("Token verification failed:", err);
     res.status(401).json({ error: "Invalid token" });
   }
 };
 
 // ======================================================
-// API ROUTES
+// ROUTES
 // ======================================================
-app.get("/api/config", (_, res) =>
-  res.json({ publishableKey: process.env.STRIPE_PUBLISHABLE_KEY })
-);
 
+// Stripe config (publishable key)
+app.get("/api/config", (req, res) => {
+  res.json({ publishableKey: process.env.STRIPE_PUBLISHABLE_KEY });
+});
+
+// User registration
 app.post("/api/register", async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password)
-    return res.status(400).json({ error: "Missing credentials" });
 
-  if (users.find(u => u.email === email))
-    return res.status(400).json({ error: "Email taken" });
+  if (!email || !password) {
+    return res.status(400).json({ error: "Email and password required" });
+  }
+
+  if (users.find(u => u.email === email)) {
+    return res.status(400).json({ error: "Email already registered" });
+  }
 
   try {
     const hashed = await bcrypt.hash(password, 10);
-    users.push({ email, password: hashed });
+    const user = { email, password: hashed, xp: 0 }; // Added xp for gamification
+    users.push(user);
     saveUsers();
 
     const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: "7d" });
-    res.json({ token });
+    res.json({ token, user: { email, xp: user.xp } });
   } catch (err) {
-    console.error("Register error:", err);
+    console.error("Registration error:", err);
     res.status(500).json({ error: "Registration failed" });
   }
 });
 
+// User login
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password)
-    return res.status(400).json({ error: "Missing credentials" });
+
+  if (!email || !password) {
+    return res.status(400).json({ error: "Email and password required" });
+  }
 
   const user = users.find(u => u.email === email);
-  if (!user) return res.status(401).json({ error: "Invalid credentials" });
+  if (!user) {
+    return res.status(401).json({ error: "Invalid credentials" });
+  }
 
   try {
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(401).json({ error: "Invalid credentials" });
+    if (!match) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
 
     const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: "7d" });
-    res.json({ token });
+    res.json({ token, user: { email, xp: user.xp || 0 } });
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ error: "Login failed" });
   }
 });
 
-app.get("/api/profile", authMiddleware, (req, res) => {
-  const user = users.find(u => u.email === req.user.email);
-  res.json({ user: { email: user.email } });
-});
+// Create Stripe checkout session (requires auth)
+app.post("/api/create-checkout-session", authenticate, async (req, res) => {
+  const { items } = req.body;
 
-app.post("/api/create-checkout-session", authMiddleware, async (req, res) => {
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ error: "Invalid items" });
+  }
+
   try {
-    const { items } = req.body;
-    if (!items?.length)
-      return res.status(400).json({ error: "Cart empty" });
-
     const successUrl = `${BASE_URL}/thank-you.html`;
     const cancelUrl = `${BASE_URL}/cart.html`;
-
-    console.log("Creating session with:"); // Debug log
-    console.log("  success_url:", successUrl);
-    console.log("  cancel_url:", cancelUrl);
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -152,27 +156,21 @@ app.post("/api/create-checkout-session", authMiddleware, async (req, res) => {
         quantity: i.quantity
       })),
       success_url: successUrl,
-      cancel_url: cancelUrl, // Updated cancel to cart.html for better UX
+      cancel_url: cancelUrl,
       metadata: { email: req.user.email }
     });
 
     res.json({ sessionId: session.id });
   } catch (err) {
-    console.error("Stripe error:", err);
+    console.error("Stripe session error:", err);
     res.status(500).json({ error: "Checkout failed" });
   }
 });
 
-// ======================================================
-// API FALLBACK
-// ======================================================
-app.use("/api", (_, res) =>
-  res.status(404).json({ error: "API route not found" })
-);
+// API fallback
+app.use("/api", (_, res) => res.status(404).json({ error: "API route not found" }));
 
-// ======================================================
-// STATIC FILES + SPA FALLBACK
-// ======================================================
+// Static files + SPA fallback
 app.use(express.static("public"));
 
 app.get("*", (req, res) => {

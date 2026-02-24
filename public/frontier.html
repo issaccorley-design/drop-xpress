@@ -1,21 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Frontier | HUNTX</title>
-<link rel="icon" href="favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <!-- Frontier-only styles -->
-  <link rel="stylesheet" href="frontier.css" />
+  <link rel="stylesheet" href="frontier.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="icon" href="favicon.ico" sizes="any">
 </head>
-
 <body class="frontier-page">
-
-  <!-- Header -->
   <header class="frontier-header">
     <h1>HUNTX</h1>
     <nav>
@@ -26,80 +19,68 @@
     </nav>
   </header>
 
-  <!-- Main -->
   <main class="frontier-container">
-
     <!-- Hero -->
     <section class="frontier-panel frontier-hero">
       <h2>The Frontier</h2>
       <p class="hero-text">
-        Building the tools, systems, and community required for
-        extreme environments — on Earth and beyond.
+        Building the tools, systems, and knowledge required for extreme environments — on Earth and beyond.
       </p>
     </section>
 
-    <!-- Mission -->
+    <!-- New Resource Hub Section -->
+    <section class="frontier-panel" style="padding:5rem 4rem;">
+      <h3 style="font-size:3.2rem; margin-bottom:1.5rem;">FRONTIER RESOURCES</h3>
+      <p style="font-size:1.5rem; max-width:800px; margin:0 auto 4rem; opacity:0.9;">
+        Tactical guides, mission briefings, gear comparisons, and future-tech insights. 
+        Written for operators who demand real performance.
+      </p>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:2.5rem;">
+        <!-- Article cards – expandable to 20+ -->
+        <a href="articles/thermal-arctic.html" class="glass" style="padding:2rem; text-decoration:none; color:inherit; transition:0.3s;">
+          <h4 style="color:#ff6b00; margin-bottom:1rem;">Thermal Imaging in Arctic Conditions</h4>
+          <p style="opacity:0.9;">What to look for when temperatures drop below -40°C and visibility is zero.</p>
+        </a>
+
+        <a href="articles/modular-autonomy.html" class="glass" style="padding:2rem; text-decoration:none; color:inherit; transition:0.3s;">
+          <h4 style="color:#ff6b00; margin-bottom:1rem;">Modular Gear for Long-Duration Autonomy</h4>
+          <p style="opacity:0.9;">How to build a loadout that lasts weeks without resupply.</p>
+        </a>
+
+        <a href="articles/hostile-terrain.html" class="glass" style="padding:2rem; text-decoration:none; color:inherit; transition:0.3s;">
+          <h4 style="color:#ff6b00; margin-bottom:1rem;">Preparing for Hostile Terrain</h4>
+          <p style="opacity:0.9;">Essential systems checklist for deserts, jungles, and high-altitude missions.</p>
+        </a>
+
+        <!-- Add more cards here as we create articles -->
+      </div>
+
+      <div style="text-align:center; margin-top:4rem;">
+        <a href="resources.html" class="cta">Browse All Resources →</a>
+      </div>
+    </section>
+
+    <!-- Existing sections remain -->
     <section class="frontier-panel">
-      <h3>Mission Focus</h3>
-      <p>
-        HUNTX exists to support exploration where conventional infrastructure
-        fails — autonomous operations, hostile terrain, and future off-world
-        resource missions.
-      </p>
-      <p>
-        Every system is designed with survivability, modularity, and long-term
-        deployment in mind.
-      </p>
+      <h3>Mission</h3>
+      <p>HUNTX is developing next-generation gear and systems for high-stakes operations...</p>
+      <a href="summit.html" class="cta secondary">Request Summit Access</a>
     </section>
 
-    <!-- Systems -->
-    <section class="frontier-panel">
-      <h3>Frontier Systems</h3>
-      <p>
-        Equipment and components engineered for extreme terrain,
-        autonomous deployment, and next-generation extraction missions.
-      </p>
-
-      <a href="shop.html" class="frontier-btn">
-        View Systems
-      </a>
-    </section>
-
-    <!-- Community -->
     <section class="frontier-panel">
       <h3>The HUNTX Community</h3>
-      <p>
-        Engineers, explorers, researchers, and builders preparing for
-        humanity’s next operational frontier.
-      </p>
-      <p>
-        Private access, collaboration tools, and mission briefings coming soon.
-      </p>
-
-      <a href="community.html" class="frontier-btn secondary">
-        Request Access
-      </a>
+      <p>Engineers, explorers, researchers, and builders preparing for humanity’s next operational frontier.</p>
+      <a href="community.html" class="cta secondary">Join the Network</a>
     </section>
-
   </main>
 
-  <!-- Footer -->
   <footer class="frontier-footer">
-    © <span id="year"></span> HUNTX
+    © <span id="year"></span> HUNTX | Newport, TN
   </footer>
 
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
   </script>
-
 </body>
-<footer>
-  © 2026 HUNTX | Newport, TN
-  <p style="margin-top:1rem; font-size:1.1rem;">
-    <a href="privacy.html" style="color:#ff6b00; margin:0 1rem;">Privacy Policy</a> |
-    <a href="terms.html" style="color:#ff6b00; margin:0 1rem;">Terms of Service</a> |
-    <a href="returns.html" style="color:#ff6b00; margin:0 1rem;">Returns & Refunds</a> |
-    <a href="contact.html" style="color:#ff6b00; margin:0 1rem;">Contact Us</a>
-  </p>
-</footer>
 </html>

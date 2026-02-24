@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard | HUNTX</title>
-
-  <link rel="stylesheet" href="frontier.css" />
-  <link rel="stylesheet" href="dashboard.css" />
-  <link rel="icon" href="favicon.ico" sizes="any" />
+  <link rel="stylesheet" href="frontier.css">
+  <link rel="stylesheet" href="dashboard.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="icon" href="favicon.ico" sizes="any">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1963624194864640"
+     crossorigin="anonymous"></script>
 </head>
-
 <body class="frontier-page">
   <header>
     <h1>HUNTX</h1>
@@ -24,21 +25,60 @@
     <section class="glass dashboard-panel">
       <h2>MISSION FEED</h2>
       <p class="mission-text">Internal updates and active operations.</p>
-      <ul class="mission-feed">
-        <li>Frontier System v0.9 field test complete</li>
-        <li>New research partners onboarded</li>
-        <li>Community access expanded</li>
+      <ul class="mission-feed" id="mission-feed">
+        <!-- Populated by JS -->
       </ul>
+    </section>
+
+    <section class="glass dashboard-panel">
+      <h2>OPERATOR STATUS</h2>
+      <div class="xp-wrapper">
+        <div id="xp-bar">
+          <div id="xp-progress"></div>
+        </div>
+        <span id="xp-text">Level 1 — 0/500 XP</span>
+      </div>
+      <div id="operator-stats" style="margin-top:2rem; font-size:1.4rem;">
+        <!-- Stats populated by script.js -->
+      </div>
+    </section>
+
+    <section class="glass dashboard-panel">
+      <h2>QUICK ACTIONS</h2>
+      <div class="dashboard-actions" style="display:flex; flex-wrap:wrap; gap:1.5rem; justify-content:center; margin-top:2rem;">
+        <a href="shop.html" class="btn">ARMORY</a>
+        <a href="cart.html" class="btn">LOADOUT</a>
+        <button class="btn" onclick="alert('Mission briefing coming soon')">BRIEFING</button>
+      </div>
     </section>
   </main>
 
   <footer>
-    © <span id="year"></span> HUNTX
+    © <span id="year"></span> HUNTX | Newport, TN
   </footer>
 
+  <script src="script.js"></script>
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
+
+    // Sample mission feed population (replace with real API later)
+    const feed = document.getElementById("mission-feed");
+    if (feed) {
+      const updates = [
+        "Frontier System v0.9 field test complete",
+        "New research partners onboarded",
+        "Community access expanded",
+        "Operator XP sync enabled",
+        "Next mission briefing scheduled"
+      ];
+      feed.innerHTML = updates.map(u => `<li>${u}</li>`).join("");
+    }
+
+    // Logout handler
+    document.getElementById("logout")?.addEventListener("click", (e) => {
+      e.preventDefault();
+      logoutUser(); // from script.js
+    });
   </script>
-  <script src="script.js"></script>
 </body>
 </html>
