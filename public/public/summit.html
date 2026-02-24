@@ -2,82 +2,229 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Summit Request</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Summit Access Request | HUNTX</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_PUBLISHER_ID"
+     crossorigin="anonymous"></script>
+  <style>
+    /* Summit-specific overrides – keeps your global style.css but adds polish */
+    .summit-hero {
+      text-align: center;
+      padding: 6rem 5% 4rem;
+      background: linear-gradient(135deg, rgba(255,107,0,0.08), rgba(58,166,255,0.05));
+      border-radius: 32px;
+      margin: 4rem auto;
+      max-width: 1100px;
+    }
+
+    .summit-hero h1 {
+      font-size: clamp(3.5rem, 9vw, 6rem);
+      background: linear-gradient(90deg, #ff6b00, #ffb800, #3aa6ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1.5rem;
+      letter-spacing: 2px;
+    }
+
+    .summit-hero p {
+      font-size: clamp(1.4rem, 4vw, 1.8rem);
+      opacity: 0.9;
+      max-width: 720px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.6;
+    }
+
+    .summit-form-container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 3rem;
+      background: rgba(15,20,35,0.75);
+      border-radius: 28px;
+      border: 1px solid rgba(255,107,0,0.35);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 40px rgba(255,107,0,0.15);
+    }
+
+    .form-group {
+      margin-bottom: 1.8rem;
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.6rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: #ff6b00;
+    }
+
+    .input, textarea {
+      width: 100%;
+      padding: 1.1rem 1.4rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255,107,0,0.4);
+      background: rgba(255,255,255,0.06);
+      color: white;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+    }
+
+    .input:focus, textarea:focus {
+      outline: none;
+      border-color: #ff6b00;
+      box-shadow: 0 0 0 3px rgba(255,107,0,0.25);
+      background: rgba(255,255,255,0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 140px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 1.4rem;
+      font-size: 1.4rem;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      background: linear-gradient(90deg, #ff6b00, #ffb800);
+      color: #000;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      box-shadow: 0 0 30px rgba(255,107,0,0.4);
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 0 60px rgba(255,107,0,0.7);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    #successMsg, #errorMsg {
+      margin-top: 2.5rem;
+      padding: 1.5rem;
+      border-radius: 16px;
+      font-size: 1.4rem;
+      text-align: center;
+      transition: all 0.4s ease;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    #successMsg {
+      background: rgba(45,139,58,0.2);
+      border: 1px solid #2d8b3a;
+      color: #2d8b3a;
+    }
+
+    #errorMsg {
+      background: rgba(231,76,60,0.2);
+      border: 1px solid #e74c3c;
+      color: #e74c3c;
+    }
+
+    #successMsg.show, #errorMsg.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .trust-note {
+      text-align: center;
+      font-size: 1.1rem;
+      opacity: 0.8;
+      margin-top: 2.5rem;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 640px) {
+      .summit-form-container {
+        padding: 2rem 1.5rem;
+      }
+      .summit-hero h1 {
+        font-size: clamp(2.8rem, 10vw, 4.5rem);
+      }
+    }
+  </style>
 </head>
-
 <body class="frontier-page">
+  <header>
+    <h1>HUNTX</h1>
+    <nav>
+      <a href="index.html">HOME</a>
+      <a href="community.html">COMMUNITY</a>
+    </nav>
+  </header>
 
-<header>
-  <h1>HUNTX</h1>
-</header>
+  <main class="container">
+    <section class="summit-hero glass">
+      <h1>SUMMIT ACCESS</h1>
+      <p>
+        Limited entry. Reserved for operators, engineers, researchers, and visionaries aligned with the HUNTX mission.
+      </p>
+      <p style="font-weight:700; color:#ff6b00; font-size:1.3rem;">
+        All requests are manually reviewed.
+      </p>
+    </section>
 
-<main class="container glass">
-  <h2>Summit Request</h2>
-  <p class="mission-text">
-    Summit access is limited. Requests are reviewed.
-  </p>
+    <div class="summit-form-container glass">
+      <form id="summitForm">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" required placeholder="John Doe">
+        </div>
 
-  <form id="summitForm">
-    <input class="input" type="text" id="name" placeholder="Name" required>
-    <input class="input" type="email" id="email" placeholder="Email" required>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" required placeholder="you@domain.com">
+        </div>
 
-    <select class="input" id="role" required>
-      <option value="">Select your role</option>
-      <option>Explorer</option>
-      <option>Builder</option>
-      <option>Engineer</option>
-      <option>Investor</option>
-    </select>
+        <div class="form-group">
+          <label for="role">Primary Role / Background</label>
+          <select id="role" required>
+            <option value="" disabled selected>Select one...</option>
+            <option>Explorer / Field Operator</option>
+            <option>Engineer / Developer</option>
+            <option>Researcher / Scientist</option>
+            <option>Investor / Strategic Partner</option>
+            <option>Other (please specify in message)</option>
+          </select>
+        </div>
 
-    <textarea
-      class="input"
-      id="message"
-      placeholder="Why should you be granted Summit access?"
-      rows="4"
-      required
-    ></textarea>
+        <div class="form-group">
+          <label for="message">Why should you be granted Summit access?</label>
+          <textarea id="message" required placeholder="Tell us about your background, skills, mission alignment, or what you can contribute... (min 100 characters)" minlength="100"></textarea>
+        </div>
 
-    <button class="btn" type="submit">Submit Request</button>
-  </form>
+        <button type="submit" class="submit-btn" id="submitBtn">SUBMIT REQUEST</button>
+      </form>
 
-  <p id="successMsg" style="display:none; margin-top:2rem;">
-    ✅ Request submitted. You’ll be contacted if approved.
-  </p>
-</main>
+      <div id="successMsg">Request received. Our team will review and respond within 72 hours.</div>
+      <div id="errorMsg">Something went wrong. Please try again or email support@huntx.co directly.</div>
 
-<footer class="mission-footer">
-  <p>Built for those who push forward.</p>
-</footer>
+      <p class="trust-note">
+        This is a high-trust network. Only serious, mission-aligned inquiries will be considered.
+      </p>
+    </div>
+  </main>
 
-<script src="summit.js"></script>
+  <footer style="background:rgba(10,10,30,0.9); padding:3rem 5%; text-align:center; border-top:1px solid #ff6b00;">
+    <p style="font-size:1.3rem; margin:1rem 0;">© 2026 HUNTX | Newport, Tennessee</p>
+    <p style="font-size:1.2rem; opacity:0.9;">
+      <a href="privacy.html" style="color:#ff6b00;">Privacy Policy</a> |
+      <a href="terms.html" style="color:#ff6b00;">Terms of Service</a> |
+      <a href="returns.html" style="color:#ff6b00;">Returns & Refunds</a> |
+      <a href="contact.html" style="color:#ff6b00;">Contact Us</a>
+    </p>
+  </footer>
+
+  <script src="summit.js"></script>
 </body>
-<footer style="background:rgba(10,10,30,0.9); padding:3rem 5%; text-align:center; border-top:1px solid #ff6b00; margin-top:4rem;">
-  <div class="trust-badges" style="display:flex; justify-content:center; gap:2rem; flex-wrap:wrap; margin-bottom:2rem;">
-    <!-- Replace src with your hosted images or free CDN links -->
-    <img src="https://trustlock.co/wp-content/uploads/2019/01/ssl-secure-checkout-trust-badge-icon.png" alt="SSL Secure" width="140" loading="lazy">
-    <img src="https://tse3.mm.bing.net/th/id/OIP.S8wuoyNOknSddf2ZACZeBAHaB5?pid=Api&P=0&h=220" alt="Powered by Stripe" width="120" loading="lazy">
-    <span style="font-size:1.4rem; color:#ff6b00; align-self:center;">30-Day Returns • Secure Payments</span>
-  </div>
-
-  <p style="font-size:1.3rem; margin:1rem 0;">
-    © 2026 HUNTX | Newport, Tennessee
-  </p>
-
-  <p style="font-size:1.2rem; opacity:0.9;">
-    <a href="privacy.html" style="color:#ff6b00; margin:0 1rem;">Privacy Policy</a> |
-    <a href="terms.html" style="color:#ff6b00; margin:0 1rem;">Terms of Service</a> |
-    <a href="returns.html" style="color:#ff6b00; margin:0 1rem;">Returns & Refunds</a> |
-    <a href="contact.html" style="color:#ff6b00; margin:0 1rem;">Contact Us</a>
-  </p>
-
-  <div style="margin-top:1.5rem;">
-    <a href="https://www.instagram.com/huntx.co" target="_blank" style="color:#ff6b00; font-size:1.8rem; margin:0 1rem;"><i class="fab fa-instagram"></i></a>
-    <a href="https://x.com/huntxgear" target="_blank" style="color:#ff6b00; font-size:1.8rem; margin:0 1rem;"><i class="fab fa-x-twitter"></i></a>
-    <!-- Add YouTube/TikTok if active -->
-  </div>
-
-  <p style="margin-top:2rem; font-size:1.1rem; opacity:0.7;">Elite gear for extreme hunts and frontier missions. Built in the USA.</p>
-</footer>
 </html>

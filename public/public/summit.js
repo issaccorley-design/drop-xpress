@@ -1,67 +1,71 @@
-// summit.js
+// summit.js – matched to new HTML + improved UX
 
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('summitForm');
+  const submitBtn = document.getElementById('submitBtn');
   const successMsg = document.getElementById('successMsg');
-  const submitBtn = form.querySelector('button[type="submit"]');
+  const errorMsg = document.getElementById('errorMsg');
 
-  if (!form) {
-    console.error('Summit form not found');
-    return;
+  if (!form || !submitBtn) return;
+
+  // Optional: pre-fill email if logged in
+  const user = getUser(); // from script.js
+  if (user) {
+    const emailInput = document.getElementById('email');
+    if (emailInput) emailInput.value = user.email;
   }
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // Disable button + show loading state
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Submitting...';
+    // Reset messages
+    successMsg.style.display = 'none';
+    errorMsg.style.display = 'none';
 
-    // Collect form data
+    // Collect data
     const formData = {
-      name: document.getElementById('name')?.value.trim() || '',
-      email: document.getElementById('email')?.value.trim() || '',
-      role: document.getElementById('role')?.value || '',
-      message: document.getElementById('message')?.value.trim() || '',
+      name: document.getElementById('name')?.value.trim(),
+      email: document.getElementById('email')?.value.trim(),
+      role: document.getElementById('role')?.value,
+      message: document.getElementById('message')?.value.trim(),
       submittedAt: new Date().toISOString(),
-      // Optional: you could add source / referrer / utm params here
-      // source: document.referrer || window.location.href,
+      source: window.location.href
     };
 
-    // Basic client-side validation (beyond HTML required)
-    if (!formData.name || !formData.email || !formData.role || !formData.message) {
-      alert('Please fill in all fields.');
-      resetButton();
+    // Client-side validation
+    if (!formData.name || !formData.email || !formData.role || !formData.message || formData.message.length < 100) {
+      errorMsg.textContent = "Please complete all fields (message must be at least 100 characters).";
+      errorMsg.style.display = 'block';
       return;
     }
 
+    // Loading state
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting...';
+
     try {
+      const response = await fetch('https://formspree.io/f/mojwbvoz', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
 
-       const response = await fetch('https://formspree.io/f/mojwbvoz', {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify(formData),
-       });
-
-      if (response.ok || response.type === 'opaque') {  // opaque = no-cors success
+      if (response.ok) {
         successMsg.style.display = 'block';
-        form.reset();
-        // Optional: scroll to message
-        successMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        form.style.opacity = '0.4';
+        form.style.pointerEvents = 'none';
+        // Optional: store last submission time to prevent spam
+        localStorage.setItem('lastSummitRequest', Date.now());
       } else {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Server responded with error');
+        throw new Error('Server responded with error');
       }
     } catch (err) {
-      console.error('Form submission failed:', err);
-      alert('Something went wrong. Please try again or email us directly.');
+      console.error(err);
+      errorMsg.textContent = "Submission failed. Please try again or email support@huntx.co.";
+      errorMsg.style.display = 'block';
     } finally {
-      resetButton();
-    }
-
-    function resetButton() {
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Submit Request';
+      submitBtn.textContent = 'SUBMIT REQUEST';
     }
   });
 });
